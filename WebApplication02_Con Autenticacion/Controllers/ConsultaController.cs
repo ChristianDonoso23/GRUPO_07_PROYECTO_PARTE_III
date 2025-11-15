@@ -15,7 +15,9 @@ namespace WebApplication02_Con_Autenticacion.Controllers
     {
         private ProyectoVeris_Context db = new ProyectoVeris_Context();
 
-        // GET: Consulta 
+        // =====================================================================
+        // INDEX
+        // =====================================================================
         [Authorize(Roles = "SuperAdmin, Administrador, Medico")]
         public ActionResult Index()
         {
@@ -59,12 +61,12 @@ namespace WebApplication02_Con_Autenticacion.Controllers
                 })
                 .ToList();
 
-            System.Diagnostics.Debug.WriteLine("Consultas cargadas: " + lista.Count);
-
             return View(lista);
         }
 
-        // GET: Consulta/Details/5
+        // =====================================================================
+        // DETALLES
+        // =====================================================================
         [Authorize(Roles = "SuperAdmin, Administrador, Medico")]
         public ActionResult Details(int? id)
         {
@@ -81,7 +83,9 @@ namespace WebApplication02_Con_Autenticacion.Controllers
             return View(consulta);
         }
 
-        // GET: Consulta/Create
+        // =====================================================================
+        // CREAR CONSULTA
+        // =====================================================================
         [Authorize(Roles = "SuperAdmin, Medico")]
         public ActionResult Create()
         {
@@ -109,7 +113,6 @@ namespace WebApplication02_Con_Autenticacion.Controllers
             return View();
         }
 
-        // POST: Consulta/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "SuperAdmin, Medico")]
@@ -145,7 +148,9 @@ namespace WebApplication02_Con_Autenticacion.Controllers
             return RedirectToAction("Index");
         }
 
-        // GET: Consulta/Edit/5
+        // =====================================================================
+        // EDITAR CONSULTA
+        // =====================================================================
         [Authorize(Roles = "SuperAdmin, Medico")]
         public ActionResult Edit(int? id)
         {
@@ -161,7 +166,6 @@ namespace WebApplication02_Con_Autenticacion.Controllers
             return View(consulta);
         }
 
-        // POST: Consulta/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "SuperAdmin, Medico")]
@@ -179,7 +183,9 @@ namespace WebApplication02_Con_Autenticacion.Controllers
             return View(consulta);
         }
 
-        // GET: Consulta/Delete/5
+        // =====================================================================
+        // ELIMINAR CONSULTA
+        // =====================================================================
         [Authorize(Roles = "SuperAdmin")]
         public ActionResult Delete(int? id)
         {
@@ -196,7 +202,6 @@ namespace WebApplication02_Con_Autenticacion.Controllers
             return View(consulta);
         }
 
-        // POST: Consulta/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "SuperAdmin")]
@@ -208,7 +213,9 @@ namespace WebApplication02_Con_Autenticacion.Controllers
             return RedirectToAction("Index");
         }
 
-        // GET: Consulta/MisCitas  → Para pacientes logueados
+        // =====================================================================
+        // CITAS PACIENTE
+        // =====================================================================
         [Authorize(Roles = "Paciente")]
         public ActionResult CitasPaciente()
         {
@@ -217,7 +224,6 @@ namespace WebApplication02_Con_Autenticacion.Controllers
             if (usuario == null)
                 return RedirectToAction("Login", "Account");
 
-            // Buscar el IdPaciente del usuario actual
             var idPaciente = db.pacientes
                 .Where(p => p.IdUsuario == usuario.Id)
                 .Select(p => p.IdPaciente)
@@ -229,29 +235,29 @@ namespace WebApplication02_Con_Autenticacion.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            // 🔹 Incluye las relaciones para evitar proxies
             var consultas = db.consultas
                 .Include(c => c.medicos)
                 .Include(c => c.pacientes)
                 .Where(c => c.IdPaciente == idPaciente)
-                .AsNoTracking() // evita proxies dinámicos
+                .AsNoTracking()
                 .ToList();
 
             return View("CitasPaciente", consultas);
         }
 
+        // =====================================================================
+        // AGENDAR CONSULTA (GET) — ***MODIFICADO PARA NAVEGAR ENTRE MESES***
+        // =====================================================================
         [Authorize(Roles = "Paciente")]
-        public ActionResult Agendar(int? idEspecialidad, int? idMedico, DateTime? fecha)
+        public ActionResult Agendar(int? idEspecialidad, int? idMedico, DateTime? fecha, int? mes, int? anio)
         {
             var usuario = SessionHelper.CurrentUser;
-
             if (usuario == null)
                 return RedirectToAction("Login", "Account");
 
-            // 1. Especialidades
+            // SELECTS
             ViewBag.Especialidades = new SelectList(db.especialidades, "IdEspecialidad", "Descripcion", idEspecialidad);
 
-            // 2. Médicos según especialidad (solo si ya eligió especialidad)
             if (idEspecialidad.HasValue)
             {
                 var listaMedicos = db.medicos
@@ -265,10 +271,30 @@ namespace WebApplication02_Con_Autenticacion.Controllers
                 ViewBag.Medicos = new SelectList(new List<medicos>(), "IdMedico", "Nombre");
             }
 
-            // 3. Fecha seleccionada
             ViewBag.FechaSeleccionada = fecha?.ToString("yyyy-MM-dd");
 
-            // 4. Horarios disponibles (si ya eligió médico y fecha)
+            // ========================================================
+            // CALENDARIO — MES / AÑO (NAVEGACIÓN)
+            // ========================================================
+            DateTime hoy = DateTime.Now;
+
+            int mesActual = mes ?? hoy.Month;
+            int anioActual = anio ?? hoy.Year;
+
+            ViewBag.MesActual = mesActual;
+            ViewBag.Anio = anioActual;
+            ViewBag.NombreMes = new DateTime(anioActual, mesActual, 1).ToString("MMMM");
+
+            // Días disponibles según especialidad
+            if (idEspecialidad.HasValue)
+                ViewBag.DiasLaborables = ObtenerDiasDisponiblesMes(idEspecialidad.Value, mesActual, anioActual);
+            else
+                ViewBag.DiasLaborables = new List<string>();
+
+            // Mini calendario
+            ViewBag.Calendario = GenerarCalendario(anioActual, mesActual);
+
+            // Generar horarios si médico + fecha seleccionados
             if (idMedico.HasValue && fecha.HasValue)
             {
                 ViewBag.Horarios = ObtenerHorariosDisponibles(idMedico.Value, fecha.Value);
@@ -281,23 +307,25 @@ namespace WebApplication02_Con_Autenticacion.Controllers
             return View();
         }
 
+        // =====================================================================
+        // HORARIOS DISPONIBLES
+        // =====================================================================
         private List<string> ObtenerHorariosDisponibles(int idMedico, DateTime fecha)
         {
             List<string> horarios = new List<string>();
 
-            // 1. No fines de semana
+            if (fecha < DateTime.Today)
+                return horarios;
+
             if (fecha.DayOfWeek == DayOfWeek.Saturday || fecha.DayOfWeek == DayOfWeek.Sunday)
                 return horarios;
 
-            // 2. Médico y especialidad
             var medico = db.medicos.Find(idMedico);
             var especialidad = db.especialidades.Find(medico.IdEspecialidad);
 
-            // Validar que trabaje ese día
             if (!EspecialidadTrabajaEseDia(especialidad, fecha))
                 return horarios;
 
-            // 3. Rango de horario (intersección clínica/especialidad)
             TimeSpan inicio = especialidad.Franja_HI < TimeSpan.FromHours(8)
                 ? TimeSpan.FromHours(8)
                 : especialidad.Franja_HI;
@@ -306,13 +334,11 @@ namespace WebApplication02_Con_Autenticacion.Controllers
                 ? TimeSpan.FromHours(18)
                 : especialidad.Franja_HF;
 
-            // 4. Horas ocupadas
             var ocupadas = db.consultas
                 .Where(c => c.IdMedico == idMedico && c.FechaConsulta == fecha)
                 .Select(c => c.HI)
                 .ToList();
 
-            // 5. Crear slots de 1 hora
             for (var hora = inicio; hora < fin; hora = hora.Add(TimeSpan.FromHours(1)))
             {
                 if (!ocupadas.Contains(hora))
@@ -322,11 +348,20 @@ namespace WebApplication02_Con_Autenticacion.Controllers
             return horarios;
         }
 
+        // =====================================================================
+        // AGENDAR CONFIRMADO
+        // =====================================================================
         [HttpPost]
         [Authorize(Roles = "Paciente")]
         public ActionResult AgendarConfirmado(int IdEspecialidad, int IdMedico, DateTime FechaConsulta, string HI)
         {
             var usuario = SessionHelper.CurrentUser;
+
+            if (FechaConsulta < DateTime.Today)
+            {
+                TempData["Error"] = "No puede agendar fechas pasadas.";
+                return RedirectToAction("Agendar", new { IdEspecialidad, IdMedico });
+            }
 
             var idPaciente = db.pacientes
                 .Where(p => p.IdUsuario == usuario.Id)
@@ -352,6 +387,129 @@ namespace WebApplication02_Con_Autenticacion.Controllers
             return RedirectToAction("CitasPaciente");
         }
 
+        // =====================================================================
+        // GENERAR CALENDARIO (CON DÍAS PASADOS EN GRIS)
+        // =====================================================================
+        private List<List<string>> GenerarCalendario(int year, int month)
+        {
+            List<List<string>> calendario = new List<List<string>>();
+
+            DateTime primerDia = new DateTime(year, month, 1);
+            int diasEnMes = DateTime.DaysInMonth(year, month);
+
+            int inicioSemana = ((int)primerDia.DayOfWeek == 0) ? 7 : (int)primerDia.DayOfWeek;
+
+            List<string> semana = new List<string>();
+
+            for (int i = 1; i < inicioSemana; i++)
+                semana.Add("");
+
+            for (int dia = 1; dia <= diasEnMes; dia++)
+            {
+                DateTime fecha = new DateTime(year, month, dia);
+
+                if (fecha < DateTime.Today)
+                {
+                    semana.Add("PAST-" + fecha.ToString("yyyy-MM-dd"));
+                }
+                else
+                {
+                    semana.Add(fecha.ToString("yyyy-MM-dd"));
+                }
+
+                if (semana.Count == 7)
+                {
+                    calendario.Add(semana);
+                    semana = new List<string>();
+                }
+            }
+
+            if (semana.Count > 0)
+            {
+                while (semana.Count < 7)
+                    semana.Add("");
+
+                calendario.Add(semana);
+            }
+
+            return calendario;
+        }
+
+        // =====================================================================
+        // DÍAS LABORABLES SEGÚN MES
+        // =====================================================================
+        private List<string> ObtenerDiasDisponiblesMes(int idEspecialidad, int mes, int anio)
+        {
+            List<string> dias = new List<string>();
+
+            var esp = db.especialidades.Find(idEspecialidad);
+            if (esp == null)
+                return dias;
+
+            int diasEnMes = DateTime.DaysInMonth(anio, mes);
+
+            for (int d = 1; d <= diasEnMes; d++)
+            {
+                DateTime fecha = new DateTime(anio, mes, d);
+
+                if (fecha < DateTime.Today)
+                    continue;
+
+                if (fecha.DayOfWeek == DayOfWeek.Saturday || fecha.DayOfWeek == DayOfWeek.Sunday)
+                    continue;
+
+                if (!EspecialidadTrabajaEseDia(esp, fecha))
+                    continue;
+
+                dias.Add(fecha.ToString("yyyy-MM-dd"));
+            }
+
+            return dias;
+        }
+
+        // =====================================================================
+        // LOGICA DE DIAS QUE TRABAJA LA ESPECIALIDAD
+        // =====================================================================
+        private bool EspecialidadTrabajaEseDia(especialidades esp, DateTime fecha)
+        {
+            string dia = DiaEnEspanol(fecha.DayOfWeek);
+            string dias = esp.Dias;
+
+            if (dias.Contains(" a "))
+            {
+                var partes = dias.Split(new string[] { " a " }, StringSplitOptions.None);
+                string inicio = partes[0].Trim();
+                string fin = partes[1].Trim();
+
+                var orden = new List<string>
+                {
+                    "Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"
+                };
+
+                int posDia = orden.IndexOf(dia);
+                int posInicio = orden.IndexOf(inicio);
+                int posFin = orden.IndexOf(fin);
+
+                return posDia >= posInicio && posDia <= posFin;
+            }
+
+            if (dias.Contains(","))
+            {
+                var lista = dias.Split(',').Select(d => d.Trim()).ToList();
+                return lista.Contains(dia);
+            }
+
+            if (dias.Contains(" y "))
+            {
+                var lista = dias.Split(new string[] { " y " }, StringSplitOptions.None)
+                                .Select(d => d.Trim()).ToList();
+
+                return lista.Contains(dia);
+            }
+
+            return dias.Trim() == dia;
+        }
+
         private string DiaEnEspanol(DayOfWeek dia)
         {
             switch (dia)
@@ -366,55 +524,6 @@ namespace WebApplication02_Con_Autenticacion.Controllers
             }
             return "";
         }
-
-        private bool EspecialidadTrabajaEseDia(especialidades esp, DateTime fecha)
-        {
-            string dia = DiaEnEspanol(fecha.DayOfWeek);
-            string dias = esp.Dias;
-
-            // Caso 1: rango tipo “Lunes a Viernes”
-            if (dias.Contains(" a "))
-            {
-                var partes = dias.Split(new string[] { " a " }, StringSplitOptions.None);
-                string inicio = partes[0].Trim();
-                string fin = partes[1].Trim();
-
-                var orden = new List<string>
-        {
-            "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"
-        };
-
-                int posDia = orden.IndexOf(dia);
-                int posInicio = orden.IndexOf(inicio);
-                int posFin = orden.IndexOf(fin);
-
-                return posDia >= posInicio && posDia <= posFin;
-            }
-
-            // Caso 2: lista separada por comas: “Lunes, Miércoles, Viernes”
-            if (dias.Contains(","))
-            {
-                var lista = dias.Split(',')
-                                .Select(d => d.Trim())
-                                .ToList();
-
-                return lista.Contains(dia);
-            }
-
-            // Caso 3: “Martes y Jueves”
-            if (dias.Contains(" y "))
-            {
-                var lista = dias.Split(new string[] { " y " }, StringSplitOptions.None)
-                                .Select(d => d.Trim())
-                                .ToList();
-
-                return lista.Contains(dia);
-            }
-
-            // Caso 4: día único
-            return dias.Trim() == dia;
-        }
-
 
         protected override void Dispose(bool disposing)
         {

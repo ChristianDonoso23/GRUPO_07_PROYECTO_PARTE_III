@@ -3,60 +3,155 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Agendar Cita</h2>
+<h2 class="mb-4">Agendar Cita</h2>
 
-<!-- Formulario principal -->
-@using (Html.BeginForm("Agendar", "Consulta", FormMethod.Get))
-{
-    <div class="form-group mb-3">
-        <label>Especialidad</label>
-        @Html.DropDownList("idEspecialidad", ViewBag.Especialidades as SelectList, "Seleccione...",
-            new { @class = "form-control", onchange = "this.form.submit();" })
+<div class="row">
+    <!-- ===================== -->
+    <!-- FORMULARIO PRINCIPAL -->
+    <!-- ===================== -->
+    <div class="col-md-6">
+
+        @using (Html.BeginForm("Agendar", "Consulta", FormMethod.Get))
+        {
+            <div class="form-group mb-3">
+                <label>Especialidad</label>
+                @Html.DropDownList("idEspecialidad", ViewBag.Especialidades as SelectList, "Seleccione...",
+                    new { @class = "form-control", onchange = "this.form.submit();" })
+            </div>
+
+            <div class="form-group mb-3">
+                <label>Médico</label>
+                @Html.DropDownList("idMedico", ViewBag.Medicos as SelectList, "Seleccione...",
+                    new { @class = "form-control", onchange = "this.form.submit();" })
+            </div>
+
+            <div class="form-group mb-3">
+                <label>Fecha</label>
+                <input type="date" name="fecha"
+                       value="@ViewBag.FechaSeleccionada"
+                       min="@DateTime.Now.ToString("yyyy-MM-dd")"
+                       class="form-control"
+                       onchange="this.form.submit();" />
+            </div>
+        }
+
+        @{
+            var horarios = ViewBag.Horarios as List<string>;
+        }
+
+        @if (horarios != null && horarios.Count > 0)
+        {
+            <h4 class="mt-4">Horarios Disponibles</h4>
+
+            using (Html.BeginForm("AgendarConfirmado", "Consulta", FormMethod.Post))
+            {
+                @Html.Hidden("IdEspecialidad", Request["idEspecialidad"])
+                @Html.Hidden("IdMedico", Request["idMedico"])
+                @Html.Hidden("FechaConsulta", Request["fecha"])
+
+                <div class="form-group mb-3">
+                    <label>Seleccione horario</label>
+                    <select class="form-control" name="HI" required>
+                        @foreach (var h in horarios)
+                        {
+                            <option value="@h">@h</option>
+                        }
+                    </select>
+                </div>
+
+                <button class="btn btn-primary mt-2" type="submit">Confirmar Cita</button>
+            }
+        }
+        else if (Request["idMedico"] != null && Request["fecha"] != null)
+        {
+            <div class="alert alert-warning mt-4">
+                No hay horarios disponibles para la fecha seleccionada.
+            </div>
+        }
+
     </div>
 
-    <div class="form-group mb-3">
-        <label>Médico</label>
-        @Html.DropDownList("idMedico", ViewBag.Medicos as SelectList, "Seleccione...",
-            new { @class = "form-control", onchange = "this.form.submit();" })
+    <!-- ===================== -->
+    <!-- PANEL DERECHA – MINI CALENDARIO -->
+    <!-- ===================== -->
+    <div class="col-md-6">
+
+        @if (ViewBag.Calendario != null)
+        {
+            <div class="card shadow-sm">
+
+                <!-- NAV MESES -->
+                <div class="card-header bg-primary text-white text-center d-flex justify-content-between align-items-center">
+
+                    <!-- Mes anterior -->
+                    <a href="@Url.Action("Agendar", new {
+                        idEspecialidad = Request["idEspecialidad"],
+                        idMedico = Request["idMedico"],
+                        mes = (ViewBag.MesActual == 1 ? 12 : ViewBag.MesActual - 1),
+                        anio = (ViewBag.MesActual == 1 ? ViewBag.Anio - 1 : ViewBag.Anio)
+                    })" class="text-white fw-bold" style="text-decoration:none;">&#8249;</a>
+
+                    <span>
+                        <strong>@ViewBag.NombreMes @ViewBag.Anio</strong>
+                    </span>
+
+                    <!-- Mes siguiente -->
+                    <a href="@Url.Action("Agendar", new {
+                        idEspecialidad = Request["idEspecialidad"],
+                        idMedico = Request["idMedico"],
+                        mes = (ViewBag.MesActual == 12 ? 1 : ViewBag.MesActual + 1),
+                        anio = (ViewBag.MesActual == 12 ? ViewBag.Anio + 1 : ViewBag.Anio)
+                    })" class="text-white fw-bold" style="text-decoration:none;">&#8250;</a>
+
+                </div>
+
+                <div class="card-body">
+
+                    <table class="table table-bordered text-center small">
+                        <thead class="table-secondary">
+                            <tr>
+                                <th>Lu</th>
+                                <th>Ma</th>
+                                <th>Mi</th>
+                                <th>Ju</th>
+                                <th>Vi</th>
+                                <th>Sa</th>
+                                <th>Do</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var semana in (List<List<string>>)ViewBag.Calendario)
+                            {
+                                <tr>
+                                    @foreach (var dia in semana)
+                                    {
+                                        if (dia == "")
+                                        {
+                                            <td class="bg-light"></td>
+                                        }
+                                        else if (dia.StartsWith("PAST-"))
+                                        {
+                                            <td class="bg-light text-muted">@dia.Substring(5).Split('-')[2]</td>
+                                        }
+                                        else if (((List<string>)ViewBag.DiasLaborables).Contains(dia))
+                                        {
+                                            <td class="bg-success text-white fw-bold">@dia.Split('-')[2]</td>
+                                        }
+                                        else
+                                        {
+                                            <td class="bg-light text-muted">@dia.Split('-')[2]</td>
+                                        }
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+
+        }
+
     </div>
-
-    <div class="form-group mb-3">
-        <label>Fecha</label>
-        <input type="date" name="fecha" value="@ViewBag.FechaSeleccionada"
-               class="form-control" onchange="this.form.submit();" />
-    </div>
-}
-
-@{
-    var horarios = ViewBag.Horarios as List<string>;
-}
-
-@if (horarios != null && horarios.Count > 0)
-{
-    <h4 class="mt-4">Horarios Disponibles</h4>
-
-    using (Html.BeginForm("AgendarConfirmado", "Consulta", FormMethod.Post))
-    {
-        @Html.Hidden("IdEspecialidad", Request["idEspecialidad"])
-        @Html.Hidden("IdMedico", Request["idMedico"])
-        @Html.Hidden("FechaConsulta", Request["fecha"])
-
-        <div class="form-group mb-3">
-            <label>Seleccione horario</label>
-            <select class="form-control" name="HI" required>
-                @foreach (var h in horarios)
-                {
-                    <option value="@h">@h</option>
-                }
-            </select>
-        </div>
-
-        <button class="btn btn-primary mt-2" type="submit">Confirmar Cita</button>
-    }
-}
-else if (Request["idMedico"] != null && Request["fecha"] != null)
-{
-    <div class="alert alert-warning mt-4">
-        No hay horarios disponibles para la fecha seleccionada.
-    </div>
-}
+</div>
