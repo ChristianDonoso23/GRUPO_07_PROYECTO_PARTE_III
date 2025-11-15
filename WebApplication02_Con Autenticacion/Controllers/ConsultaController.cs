@@ -240,6 +240,181 @@ namespace WebApplication02_Con_Autenticacion.Controllers
             return View("CitasPaciente", consultas);
         }
 
+        [Authorize(Roles = "Paciente")]
+        public ActionResult Agendar(int? idEspecialidad, int? idMedico, DateTime? fecha)
+        {
+            var usuario = SessionHelper.CurrentUser;
+
+            if (usuario == null)
+                return RedirectToAction("Login", "Account");
+
+            // 1. Especialidades
+            ViewBag.Especialidades = new SelectList(db.especialidades, "IdEspecialidad", "Descripcion", idEspecialidad);
+
+            // 2. Médicos según especialidad (solo si ya eligió especialidad)
+            if (idEspecialidad.HasValue)
+            {
+                var listaMedicos = db.medicos
+                    .Where(m => m.IdEspecialidad == idEspecialidad.Value)
+                    .ToList();
+
+                ViewBag.Medicos = new SelectList(listaMedicos, "IdMedico", "Nombre", idMedico);
+            }
+            else
+            {
+                ViewBag.Medicos = new SelectList(new List<medicos>(), "IdMedico", "Nombre");
+            }
+
+            // 3. Fecha seleccionada
+            ViewBag.FechaSeleccionada = fecha?.ToString("yyyy-MM-dd");
+
+            // 4. Horarios disponibles (si ya eligió médico y fecha)
+            if (idMedico.HasValue && fecha.HasValue)
+            {
+                ViewBag.Horarios = ObtenerHorariosDisponibles(idMedico.Value, fecha.Value);
+            }
+            else
+            {
+                ViewBag.Horarios = new List<string>();
+            }
+
+            return View();
+        }
+
+        private List<string> ObtenerHorariosDisponibles(int idMedico, DateTime fecha)
+        {
+            List<string> horarios = new List<string>();
+
+            // 1. No fines de semana
+            if (fecha.DayOfWeek == DayOfWeek.Saturday || fecha.DayOfWeek == DayOfWeek.Sunday)
+                return horarios;
+
+            // 2. Médico y especialidad
+            var medico = db.medicos.Find(idMedico);
+            var especialidad = db.especialidades.Find(medico.IdEspecialidad);
+
+            // Validar que trabaje ese día
+            if (!EspecialidadTrabajaEseDia(especialidad, fecha))
+                return horarios;
+
+            // 3. Rango de horario (intersección clínica/especialidad)
+            TimeSpan inicio = especialidad.Franja_HI < TimeSpan.FromHours(8)
+                ? TimeSpan.FromHours(8)
+                : especialidad.Franja_HI;
+
+            TimeSpan fin = especialidad.Franja_HF > TimeSpan.FromHours(18)
+                ? TimeSpan.FromHours(18)
+                : especialidad.Franja_HF;
+
+            // 4. Horas ocupadas
+            var ocupadas = db.consultas
+                .Where(c => c.IdMedico == idMedico && c.FechaConsulta == fecha)
+                .Select(c => c.HI)
+                .ToList();
+
+            // 5. Crear slots de 1 hora
+            for (var hora = inicio; hora < fin; hora = hora.Add(TimeSpan.FromHours(1)))
+            {
+                if (!ocupadas.Contains(hora))
+                    horarios.Add(hora.ToString(@"hh\:mm"));
+            }
+
+            return horarios;
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Paciente")]
+        public ActionResult AgendarConfirmado(int IdEspecialidad, int IdMedico, DateTime FechaConsulta, string HI)
+        {
+            var usuario = SessionHelper.CurrentUser;
+
+            var idPaciente = db.pacientes
+                .Where(p => p.IdUsuario == usuario.Id)
+                .Select(p => p.IdPaciente)
+                .FirstOrDefault();
+
+            TimeSpan horaInicio = TimeSpan.Parse(HI);
+            TimeSpan horaFin = horaInicio.Add(TimeSpan.FromHours(1));
+
+            consultas cita = new consultas
+            {
+                IdMedico = IdMedico,
+                IdPaciente = idPaciente,
+                FechaConsulta = FechaConsulta,
+                HI = horaInicio,
+                HF = horaFin,
+                Diagnostico = "Cita programada"
+            };
+
+            db.consultas.Add(cita);
+            db.SaveChanges();
+
+            return RedirectToAction("CitasPaciente");
+        }
+
+        private string DiaEnEspanol(DayOfWeek dia)
+        {
+            switch (dia)
+            {
+                case DayOfWeek.Monday: return "Lunes";
+                case DayOfWeek.Tuesday: return "Martes";
+                case DayOfWeek.Wednesday: return "Miércoles";
+                case DayOfWeek.Thursday: return "Jueves";
+                case DayOfWeek.Friday: return "Viernes";
+                case DayOfWeek.Saturday: return "Sábado";
+                case DayOfWeek.Sunday: return "Domingo";
+            }
+            return "";
+        }
+
+        private bool EspecialidadTrabajaEseDia(especialidades esp, DateTime fecha)
+        {
+            string dia = DiaEnEspanol(fecha.DayOfWeek);
+            string dias = esp.Dias;
+
+            // Caso 1: rango tipo “Lunes a Viernes”
+            if (dias.Contains(" a "))
+            {
+                var partes = dias.Split(new string[] { " a " }, StringSplitOptions.None);
+                string inicio = partes[0].Trim();
+                string fin = partes[1].Trim();
+
+                var orden = new List<string>
+        {
+            "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"
+        };
+
+                int posDia = orden.IndexOf(dia);
+                int posInicio = orden.IndexOf(inicio);
+                int posFin = orden.IndexOf(fin);
+
+                return posDia >= posInicio && posDia <= posFin;
+            }
+
+            // Caso 2: lista separada por comas: “Lunes, Miércoles, Viernes”
+            if (dias.Contains(","))
+            {
+                var lista = dias.Split(',')
+                                .Select(d => d.Trim())
+                                .ToList();
+
+                return lista.Contains(dia);
+            }
+
+            // Caso 3: “Martes y Jueves”
+            if (dias.Contains(" y "))
+            {
+                var lista = dias.Split(new string[] { " y " }, StringSplitOptions.None)
+                                .Select(d => d.Trim())
+                                .ToList();
+
+                return lista.Contains(dia);
+            }
+
+            // Caso 4: día único
+            return dias.Trim() == dia;
+        }
+
 
         protected override void Dispose(bool disposing)
         {

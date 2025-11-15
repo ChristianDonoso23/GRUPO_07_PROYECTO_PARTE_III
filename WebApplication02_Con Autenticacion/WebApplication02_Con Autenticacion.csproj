@@ -413,6 +413,7 @@
     <Content Include="Views\Medico\Foto_Medico.cshtml" />
     <Content Include="Views\Consulta\CitasPaciente.cshtml" />
     <Content Include="Views\Receta\RecetasPaciente.cshtml" />
+    <Content Include="Views\Consulta\Agendar.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
