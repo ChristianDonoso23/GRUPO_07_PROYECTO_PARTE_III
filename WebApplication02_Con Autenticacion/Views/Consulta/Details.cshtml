@@ -1,0 +1,49 @@
+﻿@model WebApplication02_Con_Autenticacion.Models.consultas
+
+@{
+    ViewBag.Title = "Detalles de la Consulta";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<main class="container my-5 veris-detalle-container">
+    <div class="veris-detalle-card shadow-lg p-4 rounded">
+        <h2 class="veris-detalle-title text-center mb-3">Detalles de la Consulta</h2>
+        <hr class="veris-detalle-divider" />
+
+        <div class="row veris-detalle-content">
+            <div class="col-md-6">
+                <dl class="row veris-detalle-list">
+                    <dt class="col-sm-5 veris-detalle-label">@Html.DisplayNameFor(model => model.FechaConsulta)</dt>
+                    <dd class="col-sm-7 veris-detalle-value">@Html.DisplayFor(model => model.FechaConsulta)</dd>
+
+                    <dt class="col-sm-5 veris-detalle-label">@Html.DisplayNameFor(model => model.HI)</dt>
+                    <dd class="col-sm-7 veris-detalle-value">@Html.DisplayFor(model => model.HI)</dd>
+
+                    <dt class="col-sm-5 veris-detalle-label">@Html.DisplayNameFor(model => model.HF)</dt>
+                    <dd class="col-sm-7 veris-detalle-value">@Html.DisplayFor(model => model.HF)</dd>
+
+                    <dt class="col-sm-5 veris-detalle-label">@Html.DisplayNameFor(model => model.Diagnostico)</dt>
+                    <dd class="col-sm-7 veris-detalle-value">@Html.DisplayFor(model => model.Diagnostico)</dd>
+                </dl>
+            </div>
+
+            <div class="col-md-6">
+                <dl class="row veris-detalle-list">
+                    <dt class="col-sm-5 veris-detalle-label">Paciente</dt>
+                    <dd class="col-sm-7 veris-detalle-value">@Html.DisplayFor(model => model.pacientes.Nombre)</dd>
+
+                    <dt class="col-sm-5 veris-detalle-label">Correo Paciente</dt>
+                    <dd class="col-sm-7 veris-detalle-value">@Html.DisplayFor(model => model.pacientes.AspNetUsers.Email)</dd>
+
+                    <dt class="col-sm-5 veris-detalle-label">Médico</dt>
+                    <dd class="col-sm-7 veris-detalle-value">@Html.DisplayFor(model => model.medicos.Nombre)</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="veris-detalle-buttons text-center mt-4">
+            @Html.ActionLink("Editar", "Edit", new { id = Model.IdConsulta }, new { @class = "btn btn-warning veris-detalle-btn mx-2" })
+            @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-outline-secondary veris-detalle-back mx-2" })
+        </div>
+    </div>
+</main>

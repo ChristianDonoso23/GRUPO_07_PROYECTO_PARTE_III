@@ -1,0 +1,88 @@
+﻿@model WebApplication02_Con_Autenticacion.Models.consultas
+
+@{
+    ViewBag.Title = "Editar Consulta Médica";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<main class="container my-5 veris-editar-container">
+    <div class="veris-editar-card shadow-lg p-4 rounded">
+        <h2 class="veris-editar-title text-center mb-3">Editar Consulta Médica</h2>
+        <p class="veris-editar-subtitle text-center">Modifique los datos necesarios y guarde los cambios.</p>
+        <hr class="veris-editar-divider" />
+
+        @using (Html.BeginForm("Edit", "Consulta", FormMethod.Post, new { @class = "form-horizontal veris-editar-form" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(model => model.IdConsulta)
+
+            @Html.ValidationSummary(true, "", new { @class = "text-danger veris-editar-validation" })
+
+            <!-- Médico -->
+            <div class="form-group row mb-3 veris-editar-group">
+                @Html.LabelFor(model => model.IdMedico, "Médico", htmlAttributes: new { @class = "control-label col-md-3 veris-editar-label" })
+                <div class="col-md-9 veris-editar-input-col">
+                    @Html.DropDownList("IdMedico", null, "-- Seleccione un médico --", htmlAttributes: new { @class = "form-control veris-editar-input" })
+                    @Html.ValidationMessageFor(model => model.IdMedico, "", new { @class = "text-danger d-block veris-editar-error" })
+                </div>
+            </div>
+
+            <!-- Paciente -->
+            <div class="form-group row mb-3 veris-editar-group">
+                @Html.LabelFor(model => model.IdPaciente, "Paciente", htmlAttributes: new { @class = "control-label col-md-3 veris-editar-label" })
+                <div class="col-md-9 veris-editar-input-col">
+                    @Html.DropDownList("IdPaciente", null, "-- Seleccione un paciente --", htmlAttributes: new { @class = "form-control veris-editar-input" })
+                    @Html.ValidationMessageFor(model => model.IdPaciente, "", new { @class = "text-danger d-block veris-editar-error" })
+                </div>
+            </div>
+
+            <!-- Fecha de la consulta -->
+            <div class="form-group row mb-3 veris-editar-group">
+                @Html.LabelFor(model => model.FechaConsulta, htmlAttributes: new { @class = "control-label col-md-3 veris-editar-label" })
+                <div class="col-md-9 veris-editar-input-col">
+                    @Html.TextBoxFor(model => model.FechaConsulta, "{0:yyyy-MM-dd}", new { @class = "form-control veris-editar-input", type = "date" })
+                    @Html.ValidationMessageFor(model => model.FechaConsulta, "", new { @class = "text-danger d-block veris-editar-error" })
+                </div>
+            </div>
+
+            <!-- Hora de inicio -->
+            <div class="form-group row mb-3 veris-editar-group">
+                @Html.LabelFor(model => model.HI, "Hora de Inicio", htmlAttributes: new { @class = "control-label col-md-3 veris-editar-label" })
+                <div class="col-md-9 veris-editar-input-col">
+                    @Html.TextBoxFor(model => model.HI, "{0:hh\\:mm}", new { @class = "form-control veris-editar-input", type = "time" })
+                    @Html.ValidationMessageFor(model => model.HI, "", new { @class = "text-danger d-block veris-editar-error" })
+                </div>
+            </div>
+
+            <!-- Hora de finalización -->
+            <div class="form-group row mb-3 veris-editar-group">
+                @Html.LabelFor(model => model.HF, "Hora de Finalización", htmlAttributes: new { @class = "control-label col-md-3 veris-editar-label" })
+                <div class="col-md-9 veris-editar-input-col">
+                    @Html.TextBoxFor(model => model.HF, "{0:hh\\:mm}", new { @class = "form-control veris-editar-input", type = "time" })
+                    @Html.ValidationMessageFor(model => model.HF, "", new { @class = "text-danger d-block veris-editar-error" })
+                </div>
+            </div>
+
+            <!-- Diagnóstico -->
+            <div class="form-group row mb-4 veris-editar-group">
+                @Html.LabelFor(model => model.Diagnostico, htmlAttributes: new { @class = "control-label col-md-3 veris-editar-label" })
+                <div class="col-md-9 veris-editar-input-col">
+                    @Html.TextAreaFor(model => model.Diagnostico, 5, 50, new { @class = "form-control veris-editar-input", placeholder = "Actualice el diagnóstico o hallazgos..." })
+                    @Html.ValidationMessageFor(model => model.Diagnostico, "", new { @class = "text-danger d-block veris-editar-error" })
+                </div>
+            </div>
+
+            <!-- 🔹 Botones -->
+            <div class="form-group row text-center veris-editar-button-group mt-4">
+                <div class="col-md-12">
+                    <input type="submit" value="Guardar Cambios" class="btn veris-editar-btn" />
+                    @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-outline-secondary veris-editar-back ms-2" })
+                </div>
+            </div>
+        }
+    </div>
+</main>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

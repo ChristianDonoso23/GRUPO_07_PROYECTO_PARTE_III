@@ -1,0 +1,39 @@
+﻿@model WebApplication02_Con_Autenticacion.Models.medicos
+
+@{
+    ViewBag.Title = "Detalles del Médico";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5 veris-detalle-container">
+    <div class="card veris-detalle-card p-4 shadow-sm border-0">
+        <h2 class="text-center veris-detalle-title mb-3">Detalles del Médico</h2>
+        <hr class="veris-detalle-divider" />
+
+        <div class="row">
+            <div class="col-md-8">
+                <p><strong>Nombre:</strong> @Html.DisplayFor(m => m.Nombre)</p>
+                <p><strong>Especialidad:</strong> @(Model.especialidades != null ? Model.especialidades.Descripcion : "Sin especialidad")</p>
+                <p><strong>Usuario Asignado:</strong> @(Model.AspNetUsers != null ? Model.AspNetUsers.Email : "Sin usuario")</p>
+            </div>
+            <div class="col-md-4 text-center veris-detalle-foto-wrapper">
+                @if (!string.IsNullOrEmpty(Model.Foto))
+                {
+                    <img src="~/Imagenes/@Model.Foto" class="veris-detalle-img" />
+                }
+                else
+                {
+                    <div class="text-muted">Sin imagen</div>
+                }
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            @Html.ActionLink("Volver al listado", "Index", null, new { @class = "btn btn-secondary veris-detalle-back" })
+            @if (User.IsInRole("Administrador") || User.IsInRole("SuperAdmin"))
+            {
+                @Html.ActionLink("Editar", "Edit", new { id = Model.IdMedico }, new { @class = "btn veris-detalle-btn" })
+            }
+        </div>
+    </div>
+</div>

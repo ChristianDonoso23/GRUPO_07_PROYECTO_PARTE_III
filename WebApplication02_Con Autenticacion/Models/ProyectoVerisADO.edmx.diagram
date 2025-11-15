@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="76146ba794f44ad9a42396852dc03381" Name="Diagram1" ZoomLevel="29">
+        <EntityTypeShape EntityType="ProyectoVeris_Model.C__MigrationHistory" Width="1.5" PointX="0.75" PointY="2.125" />
+        <EntityTypeShape EntityType="ProyectoVeris_Model.AspNetRoles" Width="1.5" PointX="0.75" PointY="8" />
+        <EntityTypeShape EntityType="ProyectoVeris_Model.AspNetUserClaims" Width="1.5" PointX="5.25" PointY="7.125" />
+        <EntityTypeShape EntityType="ProyectoVeris_Model.AspNetUserLogins" Width="1.5" PointX="5.25" PointY="4.625" />
+        <EntityTypeShape EntityType="ProyectoVeris_Model.AspNetUsers" Width="1.5" PointX="3" PointY="6.75" />
+        <EntityTypeShape EntityType="ProyectoVeris_Model.consultas" Width="1.5" PointX="10.5" PointY="10.5" />
+        <EntityTypeShape EntityType="ProyectoVeris_Model.especialidades" Width="1.5" PointX="6" PointY="0.75" />
+        <EntityTypeShape EntityType="ProyectoVeris_Model.medicamentos" Width="1.5" PointX="10.5" PointY="7" />
+        <EntityTypeShape EntityType="ProyectoVeris_Model.medicos" Width="1.5" PointX="8.25" PointY="7.5" />
+        <EntityTypeShape EntityType="ProyectoVeris_Model.pacientes" Width="1.5" PointX="5.25" PointY="13.25" />
+        <EntityTypeShape EntityType="ProyectoVeris_Model.recetas" Width="1.5" PointX="12.75" PointY="10.875" />
+        <AssociationConnector Association="ProyectoVeris_Model.FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId" />
+        <AssociationConnector Association="ProyectoVeris_Model.FK_dbo_AspNetUserLogins_dbo_AspNetUsers_UserId" />
+        <AssociationConnector Association="ProyectoVeris_Model.FK_medicos_AspNetUsers" />
+        <AssociationConnector Association="ProyectoVeris_Model.FK_pacientes_AspNetUsers" />
+        <AssociationConnector Association="ProyectoVeris_Model.FK_CONSULTA_REFERENCE_PACIENTE" />
+        <AssociationConnector Association="ProyectoVeris_Model.FK_IdConsulta" />
+        <AssociationConnector Association="ProyectoVeris_Model.IdMedico_FK" />
+        <AssociationConnector Association="ProyectoVeris_Model.FK_Especialidad" />
+        <AssociationConnector Association="ProyectoVeris_Model.FK_RECETAS_REFERENCE_MEDICAME" />
+        <AssociationConnector Association="ProyectoVeris_Model.AspNetUserRoles" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

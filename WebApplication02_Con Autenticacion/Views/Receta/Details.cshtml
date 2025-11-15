@@ -1,0 +1,29 @@
+﻿@model WebApplication02_Con_Autenticacion.Models.recetas
+
+@{
+    ViewBag.Title = "Detalles de la Receta Médica";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<main class="container my-5 veris-detalle-container">
+    <div class="card veris-detalle-card shadow-lg p-4">
+        <h2 class="veris-detalle-title text-center mb-3">Detalles de la Receta Médica</h2>
+        <hr class="veris-detalle-divider" />
+
+        <dl class="row mb-4">
+            <dt class="col-sm-4 veris-detalle-label">@Html.DisplayNameFor(model => model.Cantidad)</dt>
+            <dd class="col-sm-8 veris-detalle-value">@Html.DisplayFor(model => model.Cantidad)</dd>
+
+            <dt class="col-sm-4 veris-detalle-label">Diagnóstico</dt>
+            <dd class="col-sm-8 veris-detalle-value">@Html.DisplayFor(model => model.consultas.Diagnostico)</dd>
+
+            <dt class="col-sm-4 veris-detalle-label">Medicamento</dt>
+            <dd class="col-sm-8 veris-detalle-value">@Html.DisplayFor(model => model.medicamentos.Nombre)</dd>
+        </dl>
+
+        <div class="veris-detalle-buttons text-center mt-4">
+            @Html.ActionLink("Editar", "Edit", new { id = Model.IdReceta }, new { @class = "btn veris-detalle-btn mx-2" })
+            @Html.ActionLink("Volver al listado", "Index", null, new { @class = "btn btn-outline-primary veris-detalle-back mx-2" })
+        </div>
+    </div>
+</main>

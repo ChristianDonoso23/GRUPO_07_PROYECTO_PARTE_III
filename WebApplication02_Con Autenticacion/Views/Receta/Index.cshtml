@@ -1,0 +1,59 @@
+﻿@model IEnumerable<WebApplication02_Con_Autenticacion.Models.recetas>
+
+@{
+    ViewBag.Title = "Gestión de Recetas Médicas";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<main class="container my-4 veris-tabla-container">
+    <h2 class="veris-tabla-title text-center">Gestión de Recetas Médicas</h2>
+
+    <!-- Solo SuperAdmin o Médico pueden crear -->
+    @if (User.IsInRole("SuperAdmin") || User.IsInRole("Medico"))
+    {
+        <p>
+            @Html.ActionLink("Registrar Receta", "Create", null, new { @class = "btn btn-primary mb-3" })
+        </p>
+    }
+
+    <div class="veris-tabla-wrapper">
+        <table class="table veris-tabla table-bordered table-striped">
+            <thead class="veris-tabla-thead">
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.Cantidad)</th>
+                    <th>@Html.DisplayNameFor(model => model.consultas.Diagnostico)</th>
+                    <th>@Html.DisplayNameFor(model => model.medicamentos.Nombre)</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody class="veris-tabla-body-content">
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(modelItem => item.Cantidad)</td>
+                        <td>@Html.DisplayFor(modelItem => item.consultas.Diagnostico)</td>
+                        <td>@Html.DisplayFor(modelItem => item.medicamentos.Nombre)</td>
+
+                        <td class="veris-tabla-acciones">
+                            <!-- Todos los roles pueden ver detalles -->
+                            @Html.ActionLink("Detalles", "Details", new { id = item.IdReceta }, new { @class = "btn btn-sm veris-tabla-btn detalles" })
+
+                            <!-- Solo SuperAdmin o Médico pueden editar -->
+                            @if (User.IsInRole("SuperAdmin") || User.IsInRole("Medico"))
+                            {
+                                @Html.ActionLink("Editar", "Edit", new { id = item.IdReceta }, new { @class = "btn btn-sm veris-tabla-btn editar" })
+                            }
+
+                            <!-- Solo SuperAdmin puede eliminar -->
+                            @if (User.IsInRole("SuperAdmin"))
+                            {
+                                @Html.ActionLink("Eliminar", "Delete", new { id = item.IdReceta }, new { @class = "btn btn-sm veris-tabla-btn eliminar" })
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</main>

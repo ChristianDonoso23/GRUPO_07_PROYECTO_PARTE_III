@@ -1,0 +1,43 @@
+﻿@model WebApplication02_Con_Autenticacion.Models.medicamentos
+
+@{
+    ViewBag.Title = "Registrar Medicamento";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<main class="container my-5 veris-crear-container">
+    <h2 class="veris-crear-title">Registrar Medicamento</h2>
+    <p class="veris-crear-subtitle">Complete los datos del nuevo medicamento</p>
+    <hr class="veris-crear-divider" />
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        @Html.ValidationSummary(true, "", new { @class = "text-danger veris-crear-validation" })
+
+        <!-- 🔹 Campo Nombre -->
+        <div class="form-group mb-3">
+            @Html.LabelFor(model => model.Nombre, htmlAttributes: new { @class = "veris-crear-label" })
+            @Html.EditorFor(model => model.Nombre, new { htmlAttributes = new { @class = "form-control veris-crear-input", placeholder = "Ejemplo: Paracetamol" } })
+            @Html.ValidationMessageFor(model => model.Nombre, "", new { @class = "text-danger veris-crear-error" })
+        </div>
+
+        <!-- 🔹 Campo Tipo -->
+        <div class="form-group mb-4">
+            @Html.LabelFor(model => model.Tipo, htmlAttributes: new { @class = "veris-crear-label" })
+            @Html.EditorFor(model => model.Tipo, new { htmlAttributes = new { @class = "form-control veris-crear-input", placeholder = "Ejemplo: Analgésico, Antibiótico..." } })
+            @Html.ValidationMessageFor(model => model.Tipo, "", new { @class = "text-danger veris-crear-error" })
+        </div>
+
+        <!-- 🔹 Botones -->
+        <div class="veris-crear-button-group text-center mt-4">
+            <input type="submit" value="Registrar" class="btn veris-crear-btn" />
+            @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-outline-secondary ms-2" })
+        </div>
+    }
+</main>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

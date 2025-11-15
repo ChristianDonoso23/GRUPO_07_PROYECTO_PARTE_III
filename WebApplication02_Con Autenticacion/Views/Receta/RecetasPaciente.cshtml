@@ -1,0 +1,45 @@
+﻿@model IEnumerable<WebApplication02_Con_Autenticacion.Models.recetas>
+
+@{
+    ViewBag.Title = "Mis Recetas Médicas";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<main class="container my-4 veris-tabla-container">
+    <h2 class="veris-tabla-title">Mis Recetas Médicas</h2>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info mt-4">
+            No tienes recetas registradas actualmente.
+        </div>
+    }
+    else
+    {
+        <div class="veris-tabla-wrapper">
+            <table class="table veris-tabla table-bordered table-striped">
+                <thead class="veris-tabla-thead">
+                    <tr>
+                        <th>Fecha de Consulta</th>
+                        <th>Diagnóstico</th>
+                        <th>Medicamento</th>
+                        <th>Cantidad</th>
+                        <th>Médico</th>
+                    </tr>
+                </thead>
+                <tbody class="veris-tabla-body-content">
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.consultas.FechaConsulta.ToShortDateString()</td>
+                            <td>@item.consultas.Diagnostico</td>
+                            <td>@item.medicamentos.Nombre</td>
+                            <td>@item.Cantidad</td>
+                            <td>@(item.consultas.medicos != null ? item.consultas.medicos.Nombre : "No asignado")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</main>

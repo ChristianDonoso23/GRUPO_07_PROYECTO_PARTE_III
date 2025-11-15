@@ -1,0 +1,61 @@
+﻿@model IEnumerable<WebApplication02_Con_Autenticacion.Models.ViewModels.UserRoleViewModel>
+
+@{
+    ViewBag.Title = "Gestión de Roles de Usuarios";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<main class="container my-5 veris-tabla-container">
+    <h2 class="veris-tabla-title">Gestión de Roles de Usuarios</h2>
+
+    <div class="veris-tabla-wrapper">
+        <table class="table veris-tabla table-bordered table-striped align-middle">
+            <thead class="veris-tabla-thead">
+                <tr>
+                    <th>Email</th>
+                    <th>Rol Actual</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Email</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(item.Roles))
+                            {
+                                <span class="badge bg-primary">@item.Roles</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Sin rol asignado</span>
+                            }
+                        </td>
+                        <td class="veris-tabla-acciones">
+                            @Html.ActionLink("Asignar Rol", "AsignarRol", new { id = item.Id }, new { @class = "btn veris-tabla-btn detalles" })
+
+                            @using (Html.BeginForm("QuitarRol", "Rol", new { id = item.Id }, FormMethod.Post, new { @style = "display:inline-block" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <button type="submit"
+                                        class="btn veris-tabla-btn eliminar"
+                                        onclick="return confirm('¿Está seguro de quitar todos los roles a este usuario?');">
+                                    Quitar Rol
+                                </button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (TempData["Mensaje"] != null)
+    {
+        <div class="alert alert-info text-center mt-3 shadow-sm">
+            @TempData["Mensaje"]
+        </div>
+    }
+</main>

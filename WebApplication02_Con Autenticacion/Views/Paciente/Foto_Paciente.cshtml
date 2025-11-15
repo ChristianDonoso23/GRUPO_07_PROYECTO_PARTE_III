@@ -1,0 +1,13 @@
+﻿@model WebApplication02_Con_Autenticacion.Models.pacientes
+
+@if (!string.IsNullOrEmpty(Model.Foto))
+{
+    <img src="~/Imagenes/Usuarios/@Model.Foto"
+         alt="Foto de @Model.Nombre"
+         class="img-fluid veris-detalle-img"
+         style="border-radius:10px; max-height:250px; object-fit:cover;" />
+}
+else
+{
+    <div class="text-muted small">Sin foto disponible</div>
+}

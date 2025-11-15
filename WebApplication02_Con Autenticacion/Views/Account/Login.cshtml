@@ -1,0 +1,85 @@
+﻿@using WebApplication02_Con_Autenticacion.Models
+@model LoginViewModel
+
+@{
+    ViewBag.Title = "Iniciar sesión";
+}
+
+<main class="container my-4 veris-login-container" aria-labelledby="title">
+    <section id="loginForm" class="veris-login-section">
+        <h2 id="title" class="veris-login-title mb-3 text-center">@ViewBag.Title</h2>
+
+        @* 🔹 Mostrar módulo seleccionado si existe *@
+        @if (ViewBag.Modulo != null)
+        {
+            <div class="alert alert-info text-center mb-3" role="alert">
+                <strong>Módulo seleccionado:</strong> @ViewBag.Modulo
+            </div>
+        }
+
+        @using (Html.BeginForm("Login", "Account",
+               new { ReturnUrl = ViewBag.ReturnUrl, modulo = ViewBag.Modulo },
+               FormMethod.Post,
+               new { @class = "veris-login-form", role = "form", novalidate = "novalidate" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <h4 class="veris-login-subtitle text-center mb-3">Utilice una cuenta local para iniciar sesión.</h4>
+            <hr class="veris-login-divider" />
+
+            @* 🔹 Mostrar errores de validación, incluyendo el de rol/módulo *@
+            @Html.ValidationSummary(true, "", new
+            {
+                @class = "text-danger veris-login-validation text-center mb-3",
+                id = "validation-summary",
+                aria_live = "polite"
+            })
+
+            <!-- Usuario -->
+            <div class="mb-3 veris-login-group">
+                @Html.LabelFor(m => m.UserName, "Usuario", new { @class = "veris-login-label" })
+                @Html.TextBoxFor(m => m.UserName, new
+                {
+                    @class = "form-control veris-login-input",
+                    required = "required",
+                    autocomplete = "username",
+                    placeholder = "Ingrese su usuario"
+                })
+                @Html.ValidationMessageFor(m => m.UserName, "", new { @class = "text-danger d-block veris-login-error" })
+            </div>
+
+            <!-- Contraseña -->
+            <div class="mb-3 veris-login-group">
+                @Html.LabelFor(m => m.Password, "Contraseña", new { @class = "veris-login-label" })
+                @Html.PasswordFor(m => m.Password, new
+                {
+                    @class = "form-control veris-login-input",
+                    required = "required",
+                    autocomplete = "current-password",
+                    placeholder = "Ingrese su contraseña"
+                })
+                @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger d-block veris-login-error" })
+            </div>
+
+            <!-- Recordarme -->
+            <div class="mb-3 form-check veris-login-check">
+                @Html.CheckBoxFor(m => m.RememberMe, new { @class = "form-check-input veris-login-check-input", id = "RememberMe" })
+                @Html.LabelFor(m => m.RememberMe, new { @class = "form-check-label veris-login-check-label" })
+            </div>
+
+            <!-- Botón -->
+            <div class="mb-3 text-center">
+                <input type="submit" value="Iniciar sesión" class="btn btn-primary veris-login-btn w-100" />
+            </div>
+
+            <!-- Registro -->
+            <p class="text-center veris-login-register">
+                @Html.ActionLink("Registrarse como usuario nuevo", "Register", null, new { @class = "veris-login-link" })
+            </p>
+        }
+    </section>
+</main>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

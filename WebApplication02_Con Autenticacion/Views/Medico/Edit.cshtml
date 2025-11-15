@@ -1,0 +1,53 @@
+﻿@model WebApplication02_Con_Autenticacion.Models.medicos
+
+@{
+    ViewBag.Title = "Editar Médico";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="veris-crear-container">
+    <h2 class="veris-crear-title">Editar Médico</h2>
+    <p class="veris-crear-subtitle">Actualice los datos del médico</p>
+
+    @using (Html.BeginForm("Edit", "Medico", FormMethod.Post, new { enctype = "multipart/form-data", @class = "veris-crear-form" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.IdMedico)
+
+        <div class="form-group mb-3">
+            @Html.LabelFor(m => m.Nombre)
+            @Html.TextBoxFor(m => m.Nombre, new { @class = "form-control veris-register-input" })
+        </div>
+
+        <div class="form-group mb-3">
+            @Html.LabelFor(m => m.IdEspecialidad, "Especialidad")
+            @Html.DropDownList("IdEspecialidad", null, "-- Seleccione una especialidad --", new { @class = "form-control veris-register-input" })
+        </div>
+
+        <div class="form-group mb-3">
+            @Html.LabelFor(m => m.IdUsuario, "Usuario")
+            @Html.DropDownList("IdUsuario", null, "-- Seleccione un usuario --", new { @class = "form-control veris-register-input" })
+        </div>
+
+        <div class="form-group row mb-3 veris-crear-group">
+            @Html.LabelFor(model => model.Foto, new { @class = "control-label col-md-3 veris-crear-label" })
+            <div class="col-md-9 veris-crear-input-col">
+                @Html.DropDownListFor(model => model.Foto, (SelectList)ViewBag.Fotos,
+                    "-- Seleccione una imagen --", new { @class = "form-control veris-crear-input", id = "FotoSelect" })
+
+                <img id="previewFoto"
+                     src="~/Imagenes/Sellos/@Model.Foto"
+                     alt="Vista previa"
+                     class="img-thumbnail mt-3 shadow-sm"
+                     style="max-width:150px; border-radius:10px; display:@(string.IsNullOrEmpty(Model.Foto) ? "none" : "block");" />
+
+                @Html.ValidationMessageFor(model => model.Foto, "", new { @class = "text-danger d-block veris-crear-error" })
+            </div>
+        </div>
+
+        <div class="veris-crear-button-group">
+            <input type="submit" value="Guardar Cambios" class="btn veris-crear-btn" />
+            @Html.ActionLink("Volver", "Index", null, new { @class = "btn btn-secondary ms-2" })
+        </div>
+    }
+</div>

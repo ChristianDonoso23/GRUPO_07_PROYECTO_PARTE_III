@@ -1,0 +1,37 @@
+﻿@model WebApplication02_Con_Autenticacion.Models.especialidades
+
+@{
+    ViewBag.Title = "Detalles de la Especialidad";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<main class="container my-5 veris-detalle-container">
+    <div class="veris-detalle-card shadow-lg p-4 rounded">
+        <h2 class="veris-detalle-title mb-4 text-center">Detalles de la Especialidad</h2>
+        <hr class="veris-detalle-divider" />
+
+        <div class="row veris-detalle-content">
+            <div class="col-md-10 offset-md-1">
+                <dl class="row veris-detalle-list">
+                    <dt class="col-sm-4 veris-detalle-label">@Html.DisplayNameFor(model => model.Descripcion)</dt>
+                    <dd class="col-sm-8 veris-detalle-value">@Html.DisplayFor(model => model.Descripcion)</dd>
+
+                    <dt class="col-sm-4 veris-detalle-label">@Html.DisplayNameFor(model => model.Dias)</dt>
+                    <dd class="col-sm-8 veris-detalle-value">@Html.DisplayFor(model => model.Dias)</dd>
+
+                    <dt class="col-sm-4 veris-detalle-label">@Html.DisplayNameFor(model => model.Franja_HI)</dt>
+                    <dd class="col-sm-8 veris-detalle-value">@Html.DisplayFor(model => model.Franja_HI)</dd>
+
+                    <dt class="col-sm-4 veris-detalle-label">@Html.DisplayNameFor(model => model.Franja_HF)</dt>
+                    <dd class="col-sm-8 veris-detalle-value">@Html.DisplayFor(model => model.Franja_HF)</dd>
+                </dl>
+            </div>
+        </div>
+
+        <!-- 🔹 Botones -->
+        <div class="veris-detalle-buttons text-center mt-4">
+            @Html.ActionLink("Editar", "Edit", new { id = Model.IdEspecialidad }, new { @class = "btn btn-warning veris-detalle-btn mx-2" })
+            @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-outline-secondary veris-detalle-back mx-2" })
+        </div>
+    </div>
+</main>

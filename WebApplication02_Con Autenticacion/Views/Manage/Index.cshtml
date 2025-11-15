@@ -1,0 +1,53 @@
+﻿@model WebApplication02_Con_Autenticacion.Models.IndexViewModel
+@{
+    ViewBag.Title = "Administrar Cuenta";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<main class="container my-5 veris-crear-container">
+    <h2 class="veris-crear-title">Administrar Cuenta</h2>
+    <p class="veris-crear-subtitle">Configura la seguridad y los accesos de tu cuenta</p>
+    <hr class="veris-crear-divider" />
+
+    @if (!string.IsNullOrEmpty(ViewBag.StatusMessage))
+    {
+        <div class="alert alert-success text-center mb-4 shadow-sm">
+            @ViewBag.StatusMessage
+        </div>
+    }
+
+    <div class="veris-config-card p-4">
+        <h4 class="mb-3 text-primary">Opciones de Seguridad</h4>
+        <dl class="row">
+            <dt class="col-sm-4 fw-semibold">Contraseña:</dt>
+            <dd class="col-sm-8">
+                @if (Model.HasPassword)
+                {
+                    @Html.ActionLink("Cambiar Contraseña", "ChangePassword", null, new { @class = "btn btn-outline-primary btn-sm" })
+                }
+                else
+                {
+                    @Html.ActionLink("Crear Contraseña", "SetPassword", null, new { @class = "btn btn-primary btn-sm" })
+                }
+            </dd>
+
+            <dt class="col-sm-4 fw-semibold">Inicios de sesión externos:</dt>
+            <dd class="col-sm-8">
+                <span class="badge bg-secondary">@Model.Logins.Count</span>
+                @Html.ActionLink("Gestionar", "ManageLogins", null, new { @class = "btn btn-outline-secondary btn-sm ms-2" })
+            </dd>
+
+            <dt class="col-sm-4 fw-semibold">Autenticación en dos pasos:</dt>
+            <dd class="col-sm-8">
+                <p class="text-muted mb-1">
+                    No hay ningún proveedor de autenticación en dos fases configurado.
+                </p>
+                <a href="https://go.microsoft.com/fwlink/?LinkId=403804"
+                   class="text-decoration-none text-primary"
+                   target="_blank">
+                    Ver cómo configurar autenticación de dos factores
+                </a>
+            </dd>
+        </dl>
+    </div>
+</main>

@@ -1,0 +1,65 @@
+﻿@model WebApplication02_Con_Autenticacion.Models.RegisterViewModel
+@{
+    ViewBag.Title = "Registrarse";
+}
+
+<link rel="stylesheet" href="~/Content/styles.css" />
+
+<main class="container my-5 veris-register-container" aria-labelledby="title">
+    <h2 id="title" class="veris-register-title text-center">@ViewBag.Title</h2>
+
+    @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { role = "form", @class = "veris-register-form" }))
+    {
+        @Html.AntiForgeryToken()
+
+        <h4 class="veris-register-subtitle text-center">Cree una cuenta nueva</h4>
+        <hr class="veris-register-divider" />
+
+        @Html.ValidationSummary("", new { @class = "text-danger veris-register-validation", id = "validation-summary", aria_live = "polite" })
+
+        <!-- Nombre de usuario -->
+        <div class="row mb-3 align-items-center veris-register-group">
+            @Html.LabelFor(m => m.UserName, "Nombre de usuario", new { @class = "col-md-3 col-form-label veris-register-label" })
+            <div class="col-md-9 veris-register-input-col">
+                @Html.TextBoxFor(m => m.UserName, new { @class = "form-control veris-register-input", required = "required", autocomplete = "username" })
+                @Html.ValidationMessageFor(m => m.UserName, "", new { @class = "text-danger d-block veris-register-error", id = "UserName-error" })
+            </div>
+        </div>
+
+        <!-- Correo electrónico -->
+        <div class="row mb-3 align-items-center veris-register-group">
+            @Html.LabelFor(m => m.Email, "Correo electrónico", new { @class = "col-md-3 col-form-label veris-register-label" })
+            <div class="col-md-9 veris-register-input-col">
+                @Html.TextBoxFor(m => m.Email, new { @class = "form-control veris-register-input", required = "required", type = "email", autocomplete = "email" })
+                @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger d-block veris-register-error", id = "Email-error" })
+            </div>
+        </div>
+
+        <!-- Contraseña -->
+        <div class="row mb-3 align-items-center veris-register-group">
+            @Html.LabelFor(m => m.Password, "Contraseña", new { @class = "col-md-3 col-form-label veris-register-label" })
+            <div class="col-md-9 veris-register-input-col">
+                @Html.PasswordFor(m => m.Password, new { @class = "form-control veris-register-input", required = "required", autocomplete = "new-password" })
+                @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger d-block veris-register-error", id = "Password-error" })
+            </div>
+        </div>
+
+        <!-- Confirmar contraseña -->
+        <div class="row mb-3 align-items-center veris-register-group">
+            @Html.LabelFor(m => m.ConfirmPassword, "Confirmar contraseña", new { @class = "col-md-3 col-form-label veris-register-label" })
+            <div class="col-md-9 veris-register-input-col">
+                @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control veris-register-input", required = "required", autocomplete = "new-password" })
+                @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "text-danger d-block veris-register-error", id = "ConfirmPassword-error" })
+            </div>
+        </div>
+
+        <!-- Botón -->
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary veris-register-btn px-4">Registrarse</button>
+        </div>
+    }
+</main>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

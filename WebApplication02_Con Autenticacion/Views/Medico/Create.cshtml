@@ -1,0 +1,85 @@
+﻿@model WebApplication02_Con_Autenticacion.Models.medicos
+
+@{
+    ViewBag.Title = "Registrar Médico";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container my-4 veris-crear-container">
+    <h2 class="veris-crear-title">Registrar Médico</h2>
+
+    @using (Html.BeginForm("Create", "Medico", FormMethod.Post, new { enctype = "multipart/form-data", @class = "form-horizontal veris-crear-form" }))
+    {
+        @Html.AntiForgeryToken()
+
+        <h4 class="veris-crear-subtitle">Datos del Médico</h4>
+        <hr class="veris-crear-divider" />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger veris-crear-validation" })
+
+        <!-- Usuario Asociado -->
+        <div class="form-group row mb-3 veris-crear-group">
+            @Html.LabelFor(model => model.IdUsuario, "Usuario asociado", new { @class = "control-label col-md-3 veris-crear-label" })
+            <div class="col-md-9 veris-crear-input-col">
+                @Html.DropDownList(
+                    "IdUsuario",
+                    (SelectList)ViewBag.IdUsuario,
+                    "-- Seleccione un usuario --",
+                    new { @class = "form-control veris-crear-input" }
+                )
+                <small class="form-text text-muted">
+                    Si no selecciona un usuario, se generará uno automáticamente con correo <b>hotmail.com</b> y contraseña <b>123</b>.
+                </small>
+                @Html.ValidationMessageFor(model => model.IdUsuario, "", new { @class = "text-danger d-block veris-crear-error" })
+            </div>
+        </div>
+
+        <!-- Nombre -->
+        <div class="form-group row mb-3 veris-crear-group">
+            @Html.LabelFor(model => model.Nombre, "Nombre Completo", new { @class = "control-label col-md-3 veris-crear-label" })
+            <div class="col-md-9 veris-crear-input-col">
+                @Html.TextBoxFor(model => model.Nombre, new { @class = "form-control veris-crear-input", placeholder = "Ejemplo: Damaris Donoso" })
+                @Html.ValidationMessageFor(model => model.Nombre, "", new { @class = "text-danger d-block veris-crear-error" })
+            </div>
+        </div>
+
+        <!-- Especialidad -->
+        <div class="form-group row mb-3 veris-crear-group">
+            @Html.LabelFor(model => model.IdEspecialidad, "Especialidad", new { @class = "control-label col-md-3 veris-crear-label" })
+            <div class="col-md-9 veris-crear-input-col">
+                @Html.DropDownList(
+                    "IdEspecialidad",
+                    (SelectList)ViewBag.IdEspecialidad,
+                    "-- Seleccione una especialidad --",
+                    new { @class = "form-control veris-crear-input" }
+                )
+                @Html.ValidationMessageFor(model => model.IdEspecialidad, "", new { @class = "text-danger d-block veris-crear-error" })
+            </div>
+        </div>
+
+        <!-- Foto -->
+        <div class="form-group row mb-3 veris-crear-group">
+            @Html.LabelFor(model => model.Foto, new { @class = "control-label col-md-3 veris-crear-label" })
+            <div class="col-md-9 veris-crear-input-col">
+                @Html.DropDownListFor(
+                    model => model.Foto,
+                    (SelectList)ViewBag.Fotos,
+                    "-- Seleccione una imagen --",
+                    new { @class = "form-control veris-crear-input" }
+                )
+                @Html.ValidationMessageFor(model => model.Foto, "", new { @class = "text-danger d-block veris-crear-error" })
+            </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="form-group row mt-4 text-center veris-crear-button-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Registrar" class="btn veris-crear-btn btn-primary" />
+                @Html.ActionLink("Volver", "Index", null, new { @class = "btn btn-outline-secondary veris-crear-back ms-2" })
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

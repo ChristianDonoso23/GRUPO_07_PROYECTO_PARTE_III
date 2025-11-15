@@ -1,0 +1,72 @@
+﻿@model WebApplication02_Con_Autenticacion.Models.pacientes
+
+@{
+    ViewBag.Title = "Detalles del Paciente";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<main class="container my-5 veris-detalle-container">
+    <div class="veris-detalle-card shadow-lg p-4 rounded">
+
+        <h2 class="veris-detalle-title mb-4 text-center">Detalles del Paciente</h2>
+        <hr class="veris-detalle-divider" />
+
+        <div class="row veris-detalle-content">
+            <div class="col-md-7">
+                <dl class="row veris-detalle-list">
+                    <dt class="col-sm-4 veris-detalle-label">@Html.DisplayNameFor(model => model.Nombre)</dt>
+                    <dd class="col-sm-8 veris-detalle-value">@Html.DisplayFor(model => model.Nombre)</dd>
+
+                    <dt class="col-sm-4 veris-detalle-label">@Html.DisplayNameFor(model => model.Cedula)</dt>
+                    <dd class="col-sm-8 veris-detalle-value">@Html.DisplayFor(model => model.Cedula)</dd>
+
+                    <dt class="col-sm-4 veris-detalle-label">@Html.DisplayNameFor(model => model.Edad)</dt>
+                    <dd class="col-sm-8 veris-detalle-value">@Html.DisplayFor(model => model.Edad)</dd>
+
+                    <dt class="col-sm-4 veris-detalle-label">@Html.DisplayNameFor(model => model.Genero)</dt>
+                    <dd class="col-sm-8 veris-detalle-value">
+                        @{
+                            string generoTexto = Model.Genero == "M" ? "Masculino" :
+                                                 Model.Genero == "F" ? "Femenino" :
+                                                 Model.Genero == "O" ? "Otro" :
+                                                 "No especificado";
+                        }
+                        @generoTexto
+                    </dd>
+                    <dt class="col-sm-4 veris-detalle-label">@Html.DisplayNameFor(model => model.Estatura)</dt>
+                    <dd class="col-sm-8 veris-detalle-value">@Html.DisplayFor(model => model.Estatura) cm</dd>
+
+                    <dt class="col-sm-4 veris-detalle-label">@Html.DisplayNameFor(model => model.Peso)</dt>
+                    <dd class="col-sm-8 veris-detalle-value">@Html.DisplayFor(model => model.Peso) kg</dd>
+
+                    <dt class="col-sm-4 veris-detalle-label">@Html.DisplayNameFor(model => model.AspNetUsers.Email)</dt>
+                    <dd class="col-sm-8 veris-detalle-value">@Html.DisplayFor(model => model.AspNetUsers.Email)</dd>
+                </dl>
+            </div>
+
+            <div class="col-md-5 text-center veris-detalle-foto">
+                <div class="veris-detalle-foto-wrapper p-3">
+                    @if (!string.IsNullOrEmpty(Model.Foto))
+                    {
+                        <div class="veris-detalle-foto-inner">
+                            @Html.Partial("Foto_Paciente", Model)
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="veris-detalle-foto-placeholder">
+                            <i class="bi bi-person-circle fs-1 text-muted"></i>
+                            <p class="text-muted mt-2">Sin foto disponible</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="veris-detalle-buttons text-center mt-4">
+            @Html.ActionLink("Editar", "Edit", new { id = Model.IdPaciente }, new { @class = "btn btn-warning veris-detalle-btn mx-2" })
+            @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-outline-secondary veris-detalle-back mx-2" })
+        </div>
+    </div>
+</main>
+

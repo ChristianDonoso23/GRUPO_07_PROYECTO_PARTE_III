@@ -1,0 +1,56 @@
+﻿@model IEnumerable<WebApplication02_Con_Autenticacion.Models.especialidades>
+
+@{
+    ViewBag.Title = "Gestión de Especialidades";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<main class="container my-4 veris-tabla-container">
+    <h2 class="veris-tabla-title">Gestión de Especialidades</h2>
+
+    <!-- Solo SuperAdmin o Administrador pueden crear -->
+    @if (User.IsInRole("SuperAdmin") || User.IsInRole("Administrador"))
+    {
+        <p>
+            @Html.ActionLink("Crear Nuevo", "Create", null, new { @class = "btn btn-primary mb-3" })
+        </p>
+    }
+
+    <div class="veris-tabla-wrapper">
+        <table class="table veris-tabla table-bordered table-striped">
+            <thead class="veris-tabla-thead">
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.Descripcion)</th>
+                    <th>@Html.DisplayNameFor(model => model.Dias)</th>
+                    <th>@Html.DisplayNameFor(model => model.Franja_HI)</th>
+                    <th>@Html.DisplayNameFor(model => model.Franja_HF)</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody class="veris-tabla-body-content">
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(modelItem => item.Descripcion)</td>
+                        <td>@Html.DisplayFor(modelItem => item.Dias)</td>
+                        <td>@Html.DisplayFor(modelItem => item.Franja_HI)</td>
+                        <td>@Html.DisplayFor(modelItem => item.Franja_HF)</td>
+
+                        <td class="veris-tabla-acciones">
+                            <!-- Todos los roles pueden ver detalles -->
+                            @Html.ActionLink("Detalles", "Details", new { id = item.IdEspecialidad }, new { @class = "btn btn-sm veris-tabla-btn detalles" })
+
+                            <!-- Solo SuperAdmin o Administrador pueden editar o eliminar -->
+                            @if (User.IsInRole("SuperAdmin") || User.IsInRole("Administrador"))
+                            {
+                                @Html.ActionLink("Editar", "Edit", new { id = item.IdEspecialidad }, new { @class = "btn btn-sm veris-tabla-btn editar" })
+                                @Html.ActionLink("Eliminar", "Delete", new { id = item.IdEspecialidad }, new { @class = "btn btn-sm veris-tabla-btn eliminar" })
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</main>

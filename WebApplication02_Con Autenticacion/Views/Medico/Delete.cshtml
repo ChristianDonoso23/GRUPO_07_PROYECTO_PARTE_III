@@ -1,0 +1,42 @@
+﻿@model WebApplication02_Con_Autenticacion.Models.medicos
+
+@{
+    ViewBag.Title = "Eliminar Médico";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5 veris-eliminar-container">
+    <div class="card veris-eliminar-card p-4 shadow-sm border-0">
+        <h2 class="text-center veris-eliminar-title mb-3">Eliminar Médico</h2>
+        <hr class="veris-eliminar-divider" />
+
+        <p class="text-center text-muted mb-4">¿Está seguro de que desea eliminar este médico?</p>
+
+        <div class="row">
+            <div class="col-md-8">
+                <p><strong>Nombre:</strong> @Html.DisplayFor(m => m.Nombre)</p>
+                <p><strong>Especialidad:</strong> @(Model.especialidades != null ? Model.especialidades.Descripcion : "Sin especialidad")</p>
+                <p><strong>Usuario:</strong> @(Model.AspNetUsers != null ? Model.AspNetUsers.Email : "Sin usuario")</p>
+            </div>
+            <div class="col-md-4 text-center veris-eliminar-foto-wrapper">
+                @if (!string.IsNullOrEmpty(Model.Foto))
+                {
+                    <img src="~/Imagenes/@Model.Foto" class="veris-eliminar-img" />
+                }
+                else
+                {
+                    <div class="text-muted">Sin imagen</div>
+                }
+            </div>
+        </div>
+
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            <div class="text-center mt-4">
+                <input type="submit" value="Eliminar" class="btn veris-eliminar-btn" />
+                @Html.ActionLink("Cancelar", "Index", null, new { @class = "btn btn-secondary veris-eliminar-back" })
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,72 @@
+﻿@model IEnumerable<WebApplication02_Con_Autenticacion.Models.medicos>
+
+@{
+    ViewBag.Title = "Listado de Médicos";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<main class="container my-4 veris-tabla-container">
+    <h2 class="veris-tabla-title">Listado de Médicos</h2>
+
+    @if (User.IsInRole("Administrador") || User.IsInRole("SuperAdmin"))
+    {
+        <p>@Html.ActionLink("Registrar nuevo médico", "Create", null, new { @class = "btn btn-success mb-3 veris-tabla-btn-crear text-white" })</p>
+    }
+
+    <div class="veris-tabla-wrapper">
+        <table class="table veris-tabla table-bordered table-striped">
+            <thead class="veris-tabla-thead">
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.Nombre)</th>
+                    <th>@Html.DisplayNameFor(model => model.especialidades.Descripcion)</th>
+                    <th>@Html.DisplayNameFor(model => model.AspNetUsers.Email)</th>
+                    <th>Foto</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody class="veris-tabla-body-content">
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => item.Nombre)</td>
+                            <td>@(item.especialidades != null ? item.especialidades.Descripcion : "Sin especialidad")</td>
+                            <td>@(item.AspNetUsers != null ? item.AspNetUsers.Email : "Sin usuario")</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(item.Foto))
+                                {
+                                    <img src="~/Imagenes/Sellos/@item.Foto" alt="Foto de @item.Nombre" width="60" class="veris-tabla-img" />
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Sin imagen</span>
+                                }
+                            </td>
+                            <td class="veris-tabla-acciones">
+                                @if (User.IsInRole("Administrador") || User.IsInRole("SuperAdmin"))
+                                {
+                                    @Html.ActionLink("Editar", "Edit", new { id = item.IdMedico }, new { @class = "btn btn-sm veris-tabla-btn editar" })
+                                }
+
+                                @Html.ActionLink("Detalles", "Details", new { id = item.IdMedico }, new { @class = "btn btn-sm veris-tabla-btn detalles" })
+
+                                @if (User.IsInRole("Administrador") || User.IsInRole("SuperAdmin"))
+                                {
+                                    @Html.ActionLink("Eliminar", "Delete", new { id = item.IdMedico }, new { @class = "btn btn-sm veris-tabla-btn eliminar" })
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">No hay médicos registrados.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</main>

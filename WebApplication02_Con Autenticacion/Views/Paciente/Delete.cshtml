@@ -1,0 +1,67 @@
+﻿@model WebApplication02_Con_Autenticacion.Models.pacientes
+
+@{
+    ViewBag.Title = "Eliminar Paciente";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<main class="container my-5 veris-eliminar-container">
+    <div class="veris-eliminar-card shadow-lg p-4 rounded">
+        <h2 class="veris-eliminar-title text-center mb-3">Eliminar Paciente</h2>
+        <h5 class="text-center text-danger mb-4">¿Está seguro de que desea eliminar este registro?</h5>
+        <hr class="veris-eliminar-divider" />
+
+        <div class="row veris-eliminar-content">
+            <div class="col-md-7">
+                <dl class="row veris-eliminar-list">
+                    <dt class="col-sm-4 veris-eliminar-label">@Html.DisplayNameFor(model => model.Nombre)</dt>
+                    <dd class="col-sm-8 veris-eliminar-value">@Html.DisplayFor(model => model.Nombre)</dd>
+
+                    <dt class="col-sm-4 veris-eliminar-label">@Html.DisplayNameFor(model => model.Cedula)</dt>
+                    <dd class="col-sm-8 veris-eliminar-value">@Html.DisplayFor(model => model.Cedula)</dd>
+
+                    <dt class="col-sm-4 veris-eliminar-label">@Html.DisplayNameFor(model => model.Edad)</dt>
+                    <dd class="col-sm-8 veris-eliminar-value">@Html.DisplayFor(model => model.Edad)</dd>
+
+                    <dt class="col-sm-4 veris-eliminar-label">@Html.DisplayNameFor(model => model.Genero)</dt>
+                    <dd class="col-sm-8 veris-eliminar-value">@Html.DisplayFor(model => model.Genero)</dd>
+
+                    <dt class="col-sm-4 veris-eliminar-label">@Html.DisplayNameFor(model => model.Estatura)</dt>
+                    <dd class="col-sm-8 veris-eliminar-value">@Html.DisplayFor(model => model.Estatura) cm</dd>
+
+                    <dt class="col-sm-4 veris-eliminar-label">@Html.DisplayNameFor(model => model.Peso)</dt>
+                    <dd class="col-sm-8 veris-eliminar-value">@Html.DisplayFor(model => model.Peso) kg</dd>
+
+                    <dt class="col-sm-4 veris-eliminar-label">@Html.DisplayNameFor(model => model.AspNetUsers.Email)</dt>
+                    <dd class="col-sm-8 veris-eliminar-value">@Html.DisplayFor(model => model.AspNetUsers.Email)</dd>
+                </dl>
+            </div>
+
+            <div class="col-md-5 text-center veris-eliminar-foto">
+                <div class="veris-eliminar-foto-wrapper">
+                    @if (!string.IsNullOrEmpty(Model.Foto))
+                    {
+                        <img src="~/Imagenes/@Model.Foto" alt="Foto de @Model.Nombre"
+                             class="img-fluid rounded shadow-sm veris-eliminar-img" />
+                    }
+                    else
+                    {
+                        <div class="veris-eliminar-foto-placeholder">
+                            <i class="bi bi-person-circle fs-1 text-muted"></i>
+                            <p class="text-muted mt-2">Sin foto disponible</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            <div class="text-center mt-4 veris-eliminar-buttons">
+                <input type="submit" value="Eliminar" class="btn veris-eliminar-btn btn-danger mx-2" />
+                @Html.ActionLink("Cancelar", "Index", null, new { @class = "btn btn-outline-secondary veris-eliminar-back mx-2" })
+            </div>
+        }
+    </div>
+</main>

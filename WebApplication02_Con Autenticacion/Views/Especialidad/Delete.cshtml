@@ -1,0 +1,42 @@
+﻿@model WebApplication02_Con_Autenticacion.Models.especialidades
+
+@{
+    ViewBag.Title = "Eliminar Especialidad";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<main class="container my-5 veris-eliminar-container">
+    <div class="veris-eliminar-card shadow-lg p-4 rounded">
+        <h2 class="veris-eliminar-title text-center mb-3">¿Eliminar Especialidad?</h2>
+        <p class="text-center text-muted">Confirma si deseas eliminar esta especialidad del sistema.</p>
+        <hr class="veris-eliminar-divider" />
+
+        <div class="row veris-eliminar-content">
+            <div class="col-md-10 offset-md-1">
+                <dl class="row">
+                    <dt class="col-sm-4 veris-eliminar-label">@Html.DisplayNameFor(model => model.Descripcion)</dt>
+                    <dd class="col-sm-8 veris-eliminar-value">@Html.DisplayFor(model => model.Descripcion)</dd>
+
+                    <dt class="col-sm-4 veris-eliminar-label">@Html.DisplayNameFor(model => model.Dias)</dt>
+                    <dd class="col-sm-8 veris-eliminar-value">@Html.DisplayFor(model => model.Dias)</dd>
+
+                    <dt class="col-sm-4 veris-eliminar-label">@Html.DisplayNameFor(model => model.Franja_HI)</dt>
+                    <dd class="col-sm-8 veris-eliminar-value">@Html.DisplayFor(model => model.Franja_HI)</dd>
+
+                    <dt class="col-sm-4 veris-eliminar-label">@Html.DisplayNameFor(model => model.Franja_HF)</dt>
+                    <dd class="col-sm-8 veris-eliminar-value">@Html.DisplayFor(model => model.Franja_HF)</dd>
+                </dl>
+            </div>
+        </div>
+
+        <!-- 🔹 Botones -->
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            <div class="veris-eliminar-buttons text-center mt-4">
+                <input type="submit" value="Eliminar" class="btn veris-eliminar-btn mx-2" />
+                @Html.ActionLink("Cancelar", "Index", null, new { @class = "btn btn-outline-secondary veris-eliminar-back mx-2" })
+            </div>
+        }
+    </div>
+</main>

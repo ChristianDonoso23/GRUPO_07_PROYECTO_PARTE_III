@@ -1,0 +1,64 @@
+﻿@{
+    ViewBag.Title = "Inicio";
+}
+
+<main class="container text-center mt-5">
+    <!-- BIENVENIDA -->
+    <h1 class="text-primary">Bienvenido a Proyecto VERIS</h1>
+    <p class="text-muted">Sistema de gestión médica integral.</p>
+
+    <!-- CARRUSEL DE IMÁGENES -->
+    <section class="container mt-5">
+        <div id="carouselVeris" class="carousel slide shadow-sm rounded" data-bs-ride="carousel" data-bs-interval="3000">
+            <div class="carousel-inner rounded">
+                <div class="carousel-item active">
+                    <img src="~/Imagenes/Logo/carrusel1.jpg" class="d-block w-100 rounded" alt="Instalaciones Veris">
+                </div>
+                <div class="carousel-item">
+                    <img src="~/Imagenes/Logo/carrusel2.jpg" class="d-block w-100 rounded" alt="Atención Médica">
+                </div>
+                <div class="carousel-item">
+                    <img src="~/Imagenes/Logo/carrusel3.jpg" class="d-block w-100 rounded" alt="Equipo Profesional">
+                </div>
+            </div>
+
+            <!-- Controles -->
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselVeris" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Anterior</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselVeris" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Siguiente</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- SECCIÓN INFORMATIVA -->
+    <section class="row mt-5">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <h5 class="card-title text-primary"><i class="bi bi-heart-pulse-fill me-2"></i>Atención Integral</h5>
+                    <p class="card-text">Recibe atención médica completa y personalizada por parte de nuestros profesionales altamente capacitados.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <h5 class="card-title text-primary"><i class="bi bi-person-badge-fill me-2"></i>Equipo Profesional</h5>
+                    <p class="card-text">Contamos con médicos especialistas en diversas áreas para garantizar tu bienestar y confianza.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <h5 class="card-title text-primary"><i class="bi bi-clipboard2-pulse me-2"></i>Gestión Digital</h5>
+                    <p class="card-text">Accede a tus consultas, recetas y resultados en línea desde cualquier lugar, de forma rápida y segura.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
