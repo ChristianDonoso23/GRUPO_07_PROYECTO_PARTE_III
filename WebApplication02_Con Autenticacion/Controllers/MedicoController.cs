@@ -60,7 +60,7 @@ namespace WebApplication02_Con_Autenticacion.Controllers
             ViewBag.IdEspecialidad = new SelectList(db.especialidades, "IdEspecialidad", "Descripcion");
 
             /* Listamos las fotos disponibles */
-            string path = Server.MapPath("~/Imagenes");
+            string path = Server.MapPath("~/Imagenes/Sellos");
             var archivos = System.IO.Directory.GetFiles(path)
                 .Select(f => System.IO.Path.GetFileName(f))
                 .ToList();
