@@ -25,36 +25,45 @@ namespace WebApplication02_Con_Autenticacion
             AsignarRolUsuario(db);
         }
 
-        /* 1️⃣ Crear roles con IDs fijos */
+        /* Crear roles con IDs fijos */
         private void CrearRolesSistema(ApplicationDbContext db)
         {
             var roleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(db));
 
             var roles = new[]
             {
-                new IdentityRole { Id = "1", Name = "Administrador" },
-                new IdentityRole { Id = "2", Name = "Medico" },
-                new IdentityRole { Id = "3", Name = "Paciente" },
-                new IdentityRole { Id = "4", Name = "SuperAdmin" }
-            };
+        new IdentityRole { Id = "1", Name = "Administrador" },
+        new IdentityRole { Id = "2", Name = "Medico" },
+        new IdentityRole { Id = "3", Name = "Paciente" },
+        new IdentityRole { Id = "4", Name = "SuperAdmin" }
+    };
 
             foreach (var rol in roles)
             {
-                if (!roleManager.RoleExists(rol.Name))
+                /* Validación 1: ¿Existe este rol por ID? */
+                var existePorId = db.Roles.Any(r => r.Id == rol.Id);
+
+                /* Validación 2: ¿Existe este rol por nombre */
+                var existePorNombre = roleManager.RoleExists(rol.Name);
+
+                if (existePorId || existePorNombre)
                 {
-                    db.Roles.Add(rol);
-                    System.Diagnostics.Debug.WriteLine($"Rol '{rol.Name}' creado con ID {rol.Id}");
+                    System.Diagnostics.Debug.WriteLine(
+                        $"[INFO] Rol '{rol.Name}' ya existe (ID={rol.Id}). No se crea de nuevo.");
+                    continue;
                 }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine($"Rol '{rol.Name}' ya existe");
-                }
+
+                /* Si no existe ni por ID ni por Nombre → ahora sí lo creamos */
+                db.Roles.Add(rol);
+                System.Diagnostics.Debug.WriteLine(
+                    $"[CREADO] Rol '{rol.Name}' registrado con ID={rol.Id}");
             }
 
             db.SaveChanges();
         }
 
-        /* 2️⃣ Crear usuarios base */
+
+        /* Crear usuarios base */
         private void CrearUsuariosSistema(ApplicationDbContext db)
         {
             var userManager = new UserManager<ApplicationUser>(new UserStore<ApplicationUser>(db));
