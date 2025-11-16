@@ -85,7 +85,7 @@ namespace WebApplication02_Con_Autenticacion.Controllers
 
             ViewBag.IdUsuario = new SelectList(usuariosDisponibles, "Id", "Email");
 
-            string path = Server.MapPath("~/Imagenes");
+            string path = Server.MapPath("~/Imagenes/Usuarios");
             var archivos = System.IO.Directory.GetFiles(path)
                 .Select(f => System.IO.Path.GetFileName(f))
                 .ToList();
