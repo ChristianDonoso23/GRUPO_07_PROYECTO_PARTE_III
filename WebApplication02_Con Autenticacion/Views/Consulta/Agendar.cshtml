@@ -29,7 +29,8 @@
                 <label>Fecha</label>
                 <input type="date" name="fecha"
                        value="@ViewBag.FechaSeleccionada"
-                       min="@DateTime.Now.ToString("yyyy-MM-dd")"
+                       min="2000-01-01"
+                       max="2030-12-31"
                        class="form-control"
                        onchange="this.form.submit();" />
             </div>

@@ -363,6 +363,12 @@ namespace WebApplication02_Con_Autenticacion.Controllers
                 return RedirectToAction("Agendar", new { IdEspecialidad, IdMedico });
             }
 
+            if (FechaConsulta.Year < 2000 || FechaConsulta.Year > 2030)
+            {
+                TempData["Error"] = "Solo se pueden agendar citas entre los años 2000 y 2030.";
+                return RedirectToAction("Agendar", new { idEspecialidad = IdEspecialidad, idMedico = IdMedico });
+            }
+
             var idPaciente = db.pacientes
                 .Where(p => p.IdUsuario == usuario.Id)
                 .Select(p => p.IdPaciente)
