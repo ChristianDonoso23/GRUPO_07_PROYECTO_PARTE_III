@@ -897,3 +897,192 @@ footer {
 .veris-eliminar-foto-placeholder {
     padding: 40px;
 }
+
+/* ============================================ */
+/* ESTILOS PARA AGENDAR CITAS */
+/* ============================================ */
+
+/* Contenedor del calendario */
+.calendario-container {
+    width: 100%;
+    overflow: hidden;
+}
+
+.calendario-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.calendario-header th {
+    background-color: #0b2047;
+    color: white;
+    padding: 12px 5px;
+    font-weight: 600;
+    text-align: center;
+    border: 1px solid #dee2e6;
+}
+
+.calendario-table td {
+    height: 80px;
+    border: 1px solid #dee2e6;
+    padding: 0;
+    vertical-align: middle;
+}
+
+/* Estilos de las celdas del calendario */
+.calendario-dia {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 8px;
+}
+
+    .calendario-dia.vacio {
+        background-color: #f8f9fa;
+        cursor: default;
+    }
+
+    .calendario-dia.pasado {
+        background-color: #e9ecef;
+        color: #6c757d;
+        cursor: not-allowed;
+    }
+
+    .calendario-dia.disponible {
+        background-color: #d4edda;
+        border: 2px solid #28a745;
+        cursor: pointer;
+    }
+
+        .calendario-dia.disponible:hover {
+            background-color: #c3e6cb;
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        }
+
+    .calendario-dia.no-disponible {
+        background-color: #fff;
+        color: #adb5bd;
+        cursor: not-allowed;
+    }
+
+    .calendario-dia.seleccionado {
+        background-color: #ffc107 !important;
+        border: 3px solid #ff9800 !important;
+        font-weight: bold;
+        box-shadow: 0 4px 12px rgba(255, 193, 7, 0.5);
+    }
+
+.numero-dia {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 3px;
+}
+
+.badge-horarios {
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    background-color: #28a745;
+    color: white;
+    border-radius: 10px;
+}
+
+/* Grid de horarios */
+.horario-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.horario-btn {
+    padding: 12px;
+    border: 2px solid #1a73e8;
+    background-color: white;
+    color: #1a73e8;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    text-align: center;
+}
+
+    .horario-btn:hover {
+        background-color: #1a73e8;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(26, 115, 232, 0.3);
+    }
+
+    .horario-btn.seleccionado {
+        background-color: #1a73e8;
+        color: white;
+    }
+
+/* Modal de confirmación */
+.resumen-cita {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #1a73e8;
+}
+
+    .resumen-cita .row {
+        padding: 5px 0;
+    }
+
+.modal-header.bg-primary {
+    background-color: #1a73e8 !important;
+}
+
+.modal-content {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.modal-footer {
+    border-top: 2px solid #e9ecef;
+}
+
+/* Responsive para calendario */
+@media (max-width: 768px) {
+    .calendario-table td {
+        height: 60px;
+    }
+
+    .numero-dia {
+        font-size: 1rem;
+    }
+
+    .badge-horarios {
+        font-size: 0.6rem;
+        padding: 2px 5px;
+    }
+
+    .horario-grid {
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+        gap: 8px;
+    }
+
+    .horario-btn {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .calendario-header th {
+        padding: 8px 3px;
+        font-size: 0.85rem;
+    }
+
+    .horario-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

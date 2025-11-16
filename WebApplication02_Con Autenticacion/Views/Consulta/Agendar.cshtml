@@ -3,113 +3,158 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2 class="mb-4">Agendar Cita</h2>
+<h2 class="mb-4 text-center" style="color: #1a73e8;">
+    <i class="bi bi-calendar-plus"></i> Agendar Cita Médica
+</h2>
 
 <div class="row">
-    <!-- ===================== -->
-    <!-- FORMULARIO PRINCIPAL -->
-    <!-- ===================== -->
-    <div class="col-md-6">
+    <!-- ====================================================================== -->
+    <!-- COLUMNA IZQUIERDA: FORMULARIO Y HORARIOS -->
+    <!-- ====================================================================== -->
+    <div class="col-lg-6 mb-4">
 
-        @using (Html.BeginForm("Agendar", "Consulta", FormMethod.Get))
+        <!-- Formulario de selección -->
+        @using (Html.BeginForm("Agendar", "Consulta", FormMethod.Get, new { id = "formAgendar" }))
         {
-            <div class="form-group mb-3">
-                <label>Especialidad</label>
-                @Html.DropDownList("idEspecialidad", ViewBag.Especialidades as SelectList, "Seleccione...",
-                    new { @class = "form-control", onchange = "this.form.submit();" })
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-1-circle-fill text-primary"></i> Selecciona Especialidad y Médico
+                    </h5>
+
+                    <!-- Especialidad -->
+                    <div class="form-group mb-3">
+                        <label><i class="bi bi-heart-pulse"></i> Especialidad</label>
+                        @Html.DropDownList("idEspecialidad", ViewBag.Especialidades as SelectList, "Seleccione...",
+                            new { @class = "form-control", onchange = "this.form.submit();" })
+                    </div>
+
+                    <!-- Médico -->
+                    <div class="form-group mb-3">
+                        <label><i class="bi bi-person-badge"></i> Médico</label>
+                        @Html.DropDownList("idMedico", ViewBag.Medicos as SelectList, "Seleccione...",
+                            new { @class = "form-control", onchange = "this.form.submit();" })
+                    </div>
+
+                    <!-- Mensaje informativo -->
+                    @if (Request["idMedico"] != null)
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Siguiente paso:</strong> Selecciona una fecha disponible en el calendario →
+                        </div>
+                    }
+                </div>
             </div>
 
-            <div class="form-group mb-3">
-                <label>Médico</label>
-                @Html.DropDownList("idMedico", ViewBag.Medicos as SelectList, "Seleccione...",
-                    new { @class = "form-control", onchange = "this.form.submit();" })
-            </div>
-
-            <div class="form-group mb-3">
-                <label>Fecha</label>
-                <input type="date" name="fecha"
-                       value="@ViewBag.FechaSeleccionada"
-                       min="2000-01-01"
-                       max="2030-12-31"
-                       class="form-control"
-                       onchange="this.form.submit();" />
-            </div>
+            <!-- Campos ocultos para navegación -->
+            <input type="hidden" name="mes" id="mesActual" value="@ViewBag.MesActual" />
+            <input type="hidden" name="anio" id="anioActual" value="@ViewBag.Anio" />
+            <input type="hidden" name="fecha" id="fechaSeleccionada" value="@ViewBag.FechaSeleccionada" />
         }
 
+        <!-- Horarios disponibles -->
         @{
             var horarios = ViewBag.Horarios as List<string>;
         }
 
         @if (horarios != null && horarios.Count > 0)
         {
-            <h4 class="mt-4">Horarios Disponibles</h4>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-clock"></i> Horarios Disponibles
+                    </h5>
 
-            using (Html.BeginForm("AgendarConfirmado", "Consulta", FormMethod.Post))
-            {
-                @Html.Hidden("IdEspecialidad", Request["idEspecialidad"])
-                @Html.Hidden("IdMedico", Request["idMedico"])
-                @Html.Hidden("FechaConsulta", Request["fecha"])
+                    @using (Html.BeginForm("AgendarConfirmado", "Consulta", FormMethod.Post, new { id = "formConfirmar" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.Hidden("IdEspecialidad", Request["idEspecialidad"])
+                        @Html.Hidden("IdMedico", Request["idMedico"])
+                        @Html.Hidden("FechaConsulta", Request["fecha"])
 
-                <div class="form-group mb-3">
-                    <label>Seleccione horario</label>
-                    <select class="form-control" name="HI" required>
-                        @foreach (var h in horarios)
-                        {
-                            <option value="@h">@h</option>
-                        }
-                    </select>
+                        <!-- Grid de horarios -->
+                        <div class="horario-grid">
+                            @foreach (var h in horarios)
+                            {
+                                <button type="button" class="horario-btn" data-hora="@h" onclick="seleccionarHorario(this, '@h')">
+                                    <i class="bi bi-clock"></i><br />@h
+                                </button>
+                            }
+                        </div>
+
+                        <input type="hidden" name="HI" id="horarioSeleccionado" required />
+
+                        <!-- Botón confirmar -->
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mt-4" id="btnConfirmar" disabled>
+                            <i class="bi bi-check-circle"></i> Confirmar Cita
+                        </button>
+                    }
                 </div>
-
-                <button class="btn btn-primary mt-2" type="submit">Confirmar Cita</button>
-            }
-        }
-        else if (Request["idMedico"] != null && Request["fecha"] != null)
-        {
-            <div class="alert alert-warning mt-4">
-                No hay horarios disponibles para la fecha seleccionada.
             </div>
         }
-
+        else if (Request["fecha"] != null && Request["idMedico"] != null)
+        {
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle"></i>
+                No hay horarios disponibles para esta fecha.
+            </div>
+        }
     </div>
 
-    <!-- ===================== -->
-    <!-- PANEL DERECHA – MINI CALENDARIO -->
-    <!-- ===================== -->
-    <div class="col-md-6">
-
-        @if (ViewBag.Calendario != null)
+    <!-- ====================================================================== -->
+    <!-- COLUMNA DERECHA: CALENDARIO -->
+    <!-- ====================================================================== -->
+    <div class="col-lg-6">
+        @if (ViewBag.Calendario != null && Request["idMedico"] != null)
         {
             <div class="card shadow-sm">
 
-                <!-- NAV MESES -->
-                <div class="card-header bg-primary text-white text-center d-flex justify-content-between align-items-center">
+                <!-- Encabezado del calendario -->
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3">
 
-                    <!-- Mes anterior -->
-                    <a href="@Url.Action("Agendar", new {
-                        idEspecialidad = Request["idEspecialidad"],
-                        idMedico = Request["idMedico"],
-                        mes = (ViewBag.MesActual == 1 ? 12 : ViewBag.MesActual - 1),
-                        anio = (ViewBag.MesActual == 1 ? ViewBag.Anio - 1 : ViewBag.Anio)
-                    })" class="text-white fw-bold" style="text-decoration:none;">&#8249;</a>
+                    <!-- Botón mes anterior -->
+                    @if (ViewBag.EsPrimerMes == true)
+                    {
+                        <button type="button" class="btn btn-link text-white p-0 disabled" disabled
+                                style="font-size: 1.5rem; text-decoration: none; opacity: 0.3;">
+                            &#8249;
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" onclick="cambiarMes(-1)" class="btn btn-link text-white p-0"
+                                style="font-size: 1.5rem; text-decoration: none;">
+                            &#8249;
+                        </button>
+                    }
 
-                    <span>
-                        <strong>@ViewBag.NombreMes @ViewBag.Anio</strong>
+                    <!-- Título del mes -->
+                    <span class="fw-bold">
+                        <i class="bi bi-calendar3"></i> @ViewBag.NombreMes
                     </span>
 
-                    <!-- Mes siguiente -->
-                    <a href="@Url.Action("Agendar", new {
-                        idEspecialidad = Request["idEspecialidad"],
-                        idMedico = Request["idMedico"],
-                        mes = (ViewBag.MesActual == 12 ? 1 : ViewBag.MesActual + 1),
-                        anio = (ViewBag.MesActual == 12 ? ViewBag.Anio + 1 : ViewBag.Anio)
-                    })" class="text-white fw-bold" style="text-decoration:none;">&#8250;</a>
-
+                    <!-- Botón mes siguiente -->
+                    @if (ViewBag.EsUltimoMes == true)
+                    {
+                        <button type="button" class="btn btn-link text-white p-0 disabled" disabled
+                                style="font-size: 1.5rem; text-decoration: none; opacity: 0.3;">
+                            &#8250;
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" onclick="cambiarMes(1)" class="btn btn-link text-white p-0"
+                                style="font-size: 1.5rem; text-decoration: none;">
+                            &#8250;
+                        </button>
+                    }
                 </div>
 
-                <div class="card-body">
-
-                    <table class="table table-bordered text-center small">
-                        <thead class="table-secondary">
+                <!-- Cuerpo del calendario -->
+                <div class="card-body p-0 calendario-container">
+                    <table class="calendario-table">
+                        <thead class="calendario-header">
                             <tr>
                                 <th>Lu</th>
                                 <th>Ma</th>
@@ -120,28 +165,68 @@
                                 <th>Do</th>
                             </tr>
                         </thead>
-
                         <tbody>
-                            @foreach (var semana in (List<List<string>>)ViewBag.Calendario)
+                            @{
+                                var calendario = ViewBag.Calendario as List<List<string>>;
+                                var diasConHorarios = ViewBag.DiasConHorarios as Dictionary<string, int> ?? new Dictionary<string, int>();
+                                var fechaSeleccionadaStr = ViewBag.FechaSeleccionada as string;
+                                var hoy = DateTime.Today;
+                            }
+
+                            @foreach (var semana in calendario)
                             {
                                 <tr>
                                     @foreach (var dia in semana)
                                     {
-                                        if (dia == "")
+                                        if (string.IsNullOrEmpty(dia))
                                         {
-                                            <td class="bg-light"></td>
-                                        }
-                                        else if (dia.StartsWith("PAST-"))
-                                        {
-                                            <td class="bg-light text-muted">@dia.Substring(5).Split('-')[2]</td>
-                                        }
-                                        else if (((List<string>)ViewBag.DiasLaborables).Contains(dia))
-                                        {
-                                            <td class="bg-success text-white fw-bold">@dia.Split('-')[2]</td>
+                                            <!-- Celda vacía -->
+                                            <td>
+                                                <div class="calendario-dia vacio"></div>
+                                            </td>
                                         }
                                         else
                                         {
-                                            <td class="bg-light text-muted">@dia.Split('-')[2]</td>
+                                            var fecha = DateTime.Parse(dia);
+                                            var esPasado = fecha < hoy;
+                                            var esPosteriorA2030 = fecha.Year > 2030 || (fecha.Year == 2030 && fecha > new DateTime(2030, 12, 31));
+                                            var tieneHorarios = diasConHorarios.ContainsKey(dia);
+                                            var cantidadHorarios = tieneHorarios ? diasConHorarios[dia] : 0;
+                                            var esSeleccionado = dia == fechaSeleccionadaStr;
+
+                                            string claseCSS = "calendario-dia ";
+                                            if (esPosteriorA2030)
+                                            {
+                                                claseCSS += "pasado";
+                                            }
+                                            else if (esSeleccionado)
+                                            {
+                                                claseCSS += "seleccionado";
+                                            }
+                                            else if (esPasado)
+                                            {
+                                                claseCSS += "pasado";
+                                            }
+                                            else if (tieneHorarios)
+                                            {
+                                                claseCSS += "disponible";
+                                            }
+                                            else
+                                            {
+                                                claseCSS += "no-disponible";
+                                            }
+
+                                            <td>
+                                                <div class="@claseCSS" onclick="@(tieneHorarios && !esPasado && !esPosteriorA2030 ? $"seleccionarFecha('{dia}')" : "")">
+                                                    <div class="numero-dia">@fecha.Day</div>
+                                                    @if (tieneHorarios && !esPasado && !esPosteriorA2030)
+                                                    {
+                                                        <span class="badge-horarios">
+                                                            @cantidadHorarios <i class="bi bi-clock-fill"></i>
+                                                        </span>
+                                                    }
+                                                </div>
+                                            </td>
                                         }
                                     }
                                 </tr>
@@ -149,10 +234,109 @@
                         </tbody>
                     </table>
 
+                    <!-- Leyenda -->
+                    <div class="p-3 bg-light border-top">
+                        <small class="fw-bold">Leyenda:</small>
+                        <div class="d-flex flex-wrap gap-3 mt-2">
+                            <div class="d-flex align-items-center">
+                                <div style="width: 20px; height: 20px; background-color: #d4edda; border: 2px solid #28a745; border-radius: 3px; margin-right: 5px;"></div>
+                                <small>Disponible</small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div style="width: 20px; height: 20px; background-color: #ffc107; border: 2px solid #ff9800; border-radius: 3px; margin-right: 5px;"></div>
+                                <small>Seleccionado</small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div style="width: 20px; height: 20px; background-color: #e9ecef; border-radius: 3px; margin-right: 5px;"></div>
+                                <small>No disponible</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- ====================================================================== -->
+<!-- MODAL DE CONFIRMACIÓN -->
+<!-- ====================================================================== -->
+<div class="modal fade" id="modalConfirmarCita" tabindex="-1" aria-labelledby="modalConfirmarCitaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <!-- Encabezado del modal -->
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalConfirmarCitaLabel">
+                    <i class="bi bi-calendar-check"></i> Confirmar Cita Médica
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Cuerpo del modal -->
+            <div class="modal-body">
+                <div class="alert alert-info mb-3">
+                    <i class="bi bi-info-circle"></i> Por favor, revise los detalles de su cita antes de confirmar.
+                </div>
+
+                <!-- Resumen de la cita -->
+                <div class="resumen-cita">
+                    <h6 class="fw-bold mb-3">Resumen de la Cita:</h6>
+
+                    <div class="row mb-2">
+                        <div class="col-5 fw-bold">
+                            <i class="bi bi-heart-pulse text-danger"></i> Especialidad:
+                        </div>
+                        <div class="col-7" id="modalEspecialidad">-</div>
+                    </div>
+
+                    <div class="row mb-2">
+                        <div class="col-5 fw-bold">
+                            <i class="bi bi-person-badge text-primary"></i> Médico:
+                        </div>
+                        <div class="col-7" id="modalMedico">-</div>
+                    </div>
+
+                    <div class="row mb-2">
+                        <div class="col-5 fw-bold">
+                            <i class="bi bi-calendar3 text-success"></i> Fecha:
+                        </div>
+                        <div class="col-7" id="modalFecha">-</div>
+                    </div>
+
+                    <div class="row mb-2">
+                        <div class="col-5 fw-bold">
+                            <i class="bi bi-clock text-warning"></i> Horario:
+                        </div>
+                        <div class="col-7" id="modalHorario">-</div>
+                    </div>
+                </div>
+
+                <!-- Mensaje de advertencia -->
+                <div class="alert alert-warning mt-3 mb-0">
+                    <small>
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Importante:</strong> Una vez confirmada, recibirá un correo de confirmación.
+                    </small>
                 </div>
             </div>
 
-        }
-
+            <!-- Pie del modal -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-primary" id="btnConfirmarModal">
+                    <i class="bi bi-check-circle"></i> Confirmar Cita
+                </button>
+            </div>
+        </div>
     </div>
 </div>
+
+<!-- ====================================================================== -->
+<!-- SCRIPTS -->
+<!-- ====================================================================== -->
+@section Scripts {
+    <script src="~/Scripts/agendar-citas.js"></script>
+}

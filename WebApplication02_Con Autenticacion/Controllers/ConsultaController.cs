@@ -380,25 +380,66 @@ namespace WebApplication02_Con_Autenticacion.Controllers
 
             ViewBag.FechaSeleccionada = fecha?.ToString("yyyy-MM-dd");
 
-            // ========================================================
-            // CALENDARIO — MES / AÑO (NAVEGACIÓN)
-            // ========================================================
+            // CALENDARIO
             DateTime hoy = DateTime.Now;
-
             int mesActual = mes ?? hoy.Month;
             int anioActual = anio ?? hoy.Year;
 
+            // ✅ VALIDACIÓN: No permitir años mayores a 2030
+            if (anioActual > 2030)
+            {
+                anioActual = 2030;
+                mesActual = 12;
+            }
+
+            // ✅ VALIDACIÓN: No permitir años menores a año actual
+            if (anioActual < hoy.Year)
+            {
+                anioActual = hoy.Year;
+                mesActual = hoy.Month;
+            }
+
             ViewBag.MesActual = mesActual;
             ViewBag.Anio = anioActual;
-            ViewBag.NombreMes = new DateTime(anioActual, mesActual, 1).ToString("MMMM");
+            ViewBag.NombreMes = new DateTime(anioActual, mesActual, 1).ToString("MMMM yyyy", new System.Globalization.CultureInfo("es-ES"));
 
-            // Días disponibles según especialidad
-            if (idEspecialidad.HasValue)
-                ViewBag.DiasLaborables = ObtenerDiasDisponiblesMes(idEspecialidad.Value, mesActual, anioActual);
-            else
-                ViewBag.DiasLaborables = new List<string>();
+            // ✅ Verificar si estamos en diciembre 2030 (para deshabilitar botón siguiente)
+            ViewBag.EsUltimoMes = (anioActual == 2030 && mesActual == 12);
 
-            // Mini calendario
+            // ✅ Verificar si estamos en el mes actual (para deshabilitar botón anterior)
+            ViewBag.EsPrimerMes = (anioActual == hoy.Year && mesActual == hoy.Month);
+
+            // Obtener días con horarios disponibles
+            Dictionary<string, int> diasConHorarios = new Dictionary<string, int>();
+
+            if (idEspecialidad.HasValue && idMedico.HasValue)
+            {
+                var esp = db.especialidades.Find(idEspecialidad.Value);
+                int diasEnMes = DateTime.DaysInMonth(anioActual, mesActual);
+
+                for (int d = 1; d <= diasEnMes; d++)
+                {
+                    DateTime fechaTemp = new DateTime(anioActual, mesActual, d);
+
+                    // ✅ No incluir fechas posteriores a 2030-12-31
+                    if (fechaTemp.Year > 2030 || (fechaTemp.Year == 2030 && fechaTemp.Month == 12 && fechaTemp.Day > 31))
+                        continue;
+
+                    if (fechaTemp >= DateTime.Today &&
+                        fechaTemp.DayOfWeek != DayOfWeek.Saturday &&
+                        fechaTemp.DayOfWeek != DayOfWeek.Sunday &&
+                        EspecialidadTrabajaEseDia(esp, fechaTemp))
+                    {
+                        var horariosDisponibles = ObtenerHorariosDisponibles(idMedico.Value, fechaTemp);
+                        if (horariosDisponibles.Count > 0)
+                        {
+                            diasConHorarios[fechaTemp.ToString("yyyy-MM-dd")] = horariosDisponibles.Count;
+                        }
+                    }
+                }
+            }
+
+            ViewBag.DiasConHorarios = diasConHorarios;
             ViewBag.Calendario = GenerarCalendario(anioActual, mesActual);
 
             // Generar horarios si médico + fecha seleccionados
@@ -511,38 +552,39 @@ namespace WebApplication02_Con_Autenticacion.Controllers
             DateTime primerDia = new DateTime(year, month, 1);
             int diasEnMes = DateTime.DaysInMonth(year, month);
 
-            int inicioSemana = ((int)primerDia.DayOfWeek == 0) ? 7 : (int)primerDia.DayOfWeek;
+            // Obtener el día de la semana del primer día (Lunes = 1, Domingo = 7)
+            int diaSemana = (int)primerDia.DayOfWeek;
+            if (diaSemana == 0) diaSemana = 7; // Domingo es 7 en vez de 0
 
             List<string> semana = new List<string>();
 
-            for (int i = 1; i < inicioSemana; i++)
+            // Llenar días vacíos antes del primer día del mes
+            for (int i = 1; i < diaSemana; i++)
+            {
                 semana.Add("");
+            }
 
+            // Agregar todos los días del mes
             for (int dia = 1; dia <= diasEnMes; dia++)
             {
                 DateTime fecha = new DateTime(year, month, dia);
+                semana.Add(fecha.ToString("yyyy-MM-dd"));
 
-                if (fecha < DateTime.Today)
-                {
-                    semana.Add("PAST-" + fecha.ToString("yyyy-MM-dd"));
-                }
-                else
-                {
-                    semana.Add(fecha.ToString("yyyy-MM-dd"));
-                }
-
+                // Si completamos 7 días, guardamos la semana y empezamos otra
                 if (semana.Count == 7)
                 {
-                    calendario.Add(semana);
+                    calendario.Add(new List<string>(semana));
                     semana = new List<string>();
                 }
             }
 
+            // Completar la última semana con días vacíos si es necesario
             if (semana.Count > 0)
             {
                 while (semana.Count < 7)
+                {
                     semana.Add("");
-
+                }
                 calendario.Add(semana);
             }
 
