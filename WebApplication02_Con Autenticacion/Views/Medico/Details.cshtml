@@ -5,35 +5,57 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container mt-5 veris-detalle-container">
-    <div class="card veris-detalle-card p-4 shadow-sm border-0">
-        <h2 class="text-center veris-detalle-title mb-3">Detalles del Médico</h2>
+<main class="container my-5 veris-detalle-container">
+    <div class="veris-detalle-card shadow-lg p-4 rounded">
+        <h2 class="veris-detalle-title mb-4 text-center">Detalles del Médico</h2>
         <hr class="veris-detalle-divider" />
 
-        <div class="row">
-            <div class="col-md-8">
-                <p><strong>Nombre:</strong> @Html.DisplayFor(m => m.Nombre)</p>
-                <p><strong>Especialidad:</strong> @(Model.especialidades != null ? Model.especialidades.Descripcion : "Sin especialidad")</p>
-                <p><strong>Usuario Asignado:</strong> @(Model.AspNetUsers != null ? Model.AspNetUsers.Email : "Sin usuario")</p>
+        <div class="row veris-detalle-content">
+            <!-- Columna de información -->
+            <div class="col-md-7">
+                <dl class="row veris-detalle-list">
+                    <dt class="col-sm-4 veris-detalle-label">Nombre</dt>
+                    <dd class="col-sm-8 veris-detalle-value">@Html.DisplayFor(model => model.Nombre)</dd>
+
+                    <dt class="col-sm-4 veris-detalle-label">Especialidad</dt>
+                    <dd class="col-sm-8 veris-detalle-value">
+                        @(Model.especialidades != null ? Model.especialidades.Descripcion : "Sin especialidad")
+                    </dd>
+
+                    <dt class="col-sm-4 veris-detalle-label">Usuario Asociado</dt>
+                    <dd class="col-sm-8 veris-detalle-value">
+                        @(Model.AspNetUsers != null ? Model.AspNetUsers.Email : "Sin usuario")
+                    </dd>
+                </dl>
             </div>
-            <div class="col-md-4 text-center veris-detalle-foto-wrapper">
-                @if (!string.IsNullOrEmpty(Model.Foto))
-                {
-                    <img src="~/Imagenes/@Model.Foto" class="veris-detalle-img" />
-                }
-                else
-                {
-                    <div class="text-muted">Sin imagen</div>
-                }
+
+            <!-- Columna de foto/sello -->
+            <div class="col-md-5 text-center veris-detalle-foto">
+                <div class="veris-detalle-foto-wrapper p-3">
+                    @if (!string.IsNullOrEmpty(Model.Foto))
+                    {
+                        <div class="veris-detalle-foto-inner">
+                            @Html.Partial("Foto_Medico", Model)
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="veris-detalle-foto-placeholder">
+                            <i class="bi bi-person-circle fs-1 text-muted"></i>
+                            <p class="text-muted mt-2">Sin foto disponible</p>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
 
-        <div class="text-center mt-4">
-            @Html.ActionLink("Volver al listado", "Index", null, new { @class = "btn btn-secondary veris-detalle-back" })
+        <!-- Botones de acción -->
+        <div class="veris-detalle-buttons text-center mt-4">
             @if (User.IsInRole("Administrador") || User.IsInRole("SuperAdmin"))
             {
-                @Html.ActionLink("Editar", "Edit", new { id = Model.IdMedico }, new { @class = "btn veris-detalle-btn" })
+                @Html.ActionLink("Editar", "Edit", new { id = Model.IdMedico }, new { @class = "btn btn-warning veris-detalle-btn mx-2" })
             }
+            @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-outline-secondary veris-detalle-back mx-2" })
         </div>
     </div>
-</div>
+</main>

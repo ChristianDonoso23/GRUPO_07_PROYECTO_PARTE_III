@@ -13,6 +13,29 @@
 
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+
+    <!-- FORZAR FOOTER AL FONDO -->
+    <style>
+        html {
+            height: 100%;
+        }
+
+        body {
+            display: flex !important;
+            flex-direction: column !important;
+            min-height: 100vh !important;
+            margin: 0 !important;
+        }
+
+        .container.body-content {
+            flex: 1 0 auto !important;
+        }
+
+        .footer-veris {
+            flex-shrink: 0 !important;
+            margin-top: auto !important;
+        }
+    </style>
 </head>
 <body>
 
@@ -64,7 +87,7 @@
                             <li class="nav-item"><a class="nav-link" href="@Url.Action("Index", "Paciente")"><i class="bi bi-person-circle me-1"></i>Mis Datos</a></li>
                             <li class="nav-item"><a class="nav-link" href="@Url.Action("CitasPaciente", "Consulta")"><i class="bi bi-clipboard2-pulse me-1"></i>Mis Consultas</a></li>
                             <li class="nav-item"><a class="nav-link" href="@Url.Action("RecetasPaciente", "Receta")"><i class="bi bi-capsule-pill me-1"></i>Mis Recetas</a></li>
-                            <li class="nav-item"><a class="nav-link" href="@Url.Action("Agendar", "Consulta")"><i class="bi bi-capsule-pill me-1"></i>Agendar Cita</a></li>
+                            <li class="nav-item"><a class="nav-link" href="@Url.Action("Agendar", "Consulta")"><i class="bi bi-calendar-plus me-1"></i>Agendar Cita</a></li>
                         }
                     }
                     else
@@ -92,7 +115,7 @@
     </div>
 
     <!-- FOOTER VERIS -->
-    <footer class="footer-veris mt-5">
+    <footer class="footer-veris">
         <!-- Franja superior con redes -->
         <div class="footer-top text-center text-white py-3 bg-primary">
             <h6 class="mb-2">Encuentra nuestras redes sociales</h6>

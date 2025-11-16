@@ -12,72 +12,133 @@
     </p>
     <hr class="veris-crear-divider" />
 
-    @using (Html.BeginForm("Create", "Consulta", FormMethod.Post, new { @class = "form-horizontal veris-crear-form" }))
+    @* Mostrar mensajes de error *@
+    @if (TempData["Error"] != null)
     {
-        @Html.AntiForgeryToken()
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
-        @Html.ValidationSummary(true, "", new { @class = "text-danger veris-crear-validation" })
-
+    @* Formulario de selección de médico, paciente y fecha *@
+    @using (Html.BeginForm("Create", "Consulta", FormMethod.Get, new { @class = "form-horizontal veris-crear-form" }))
+    {
         <!-- Médico -->
         <div class="form-group row mb-3 veris-crear-group">
-            @Html.LabelFor(model => model.IdMedico, "Médico", htmlAttributes: new { @class = "control-label col-md-3 veris-crear-label" })
+            <label class="control-label col-md-3 veris-crear-label">Médico</label>
             <div class="col-md-9 veris-crear-input-col">
-                @Html.DropDownList("IdMedico", null, "-- Seleccione un médico --", htmlAttributes: new { @class = "form-control veris-crear-input" })
-                @Html.ValidationMessageFor(model => model.IdMedico, "", new { @class = "text-danger d-block veris-crear-error" })
+                @Html.DropDownList("idMedico", ViewBag.IdMedico as SelectList, "-- Seleccione un médico --",
+                    new { @class = "form-control veris-crear-input", onchange = "this.form.submit();" })
             </div>
         </div>
 
         <!-- Paciente -->
         <div class="form-group row mb-3 veris-crear-group">
-            @Html.LabelFor(model => model.IdPaciente, "Paciente", htmlAttributes: new { @class = "control-label col-md-3 veris-crear-label" })
+            <label class="control-label col-md-3 veris-crear-label">Paciente</label>
             <div class="col-md-9 veris-crear-input-col">
-                @Html.DropDownList("IdPaciente", null, "-- Seleccione un paciente --", htmlAttributes: new { @class = "form-control veris-crear-input" })
-                @Html.ValidationMessageFor(model => model.IdPaciente, "", new { @class = "text-danger d-block veris-crear-error" })
+                @Html.DropDownList("idPaciente", ViewBag.IdPaciente as SelectList, "-- Seleccione un paciente --",
+                    new { @class = "form-control veris-crear-input" })
             </div>
         </div>
 
         <!-- Fecha de consulta -->
         <div class="form-group row mb-3 veris-crear-group">
-            @Html.LabelFor(model => model.FechaConsulta, htmlAttributes: new { @class = "control-label col-md-3 veris-crear-label" })
+            <label class="control-label col-md-3 veris-crear-label">Fecha de Consulta</label>
             <div class="col-md-9 veris-crear-input-col">
-                @Html.TextBoxFor(model => model.FechaConsulta, "{0:yyyy-MM-dd}", new { @class = "form-control veris-crear-input", type = "date" })
-                @Html.ValidationMessageFor(model => model.FechaConsulta, "", new { @class = "text-danger d-block veris-crear-error" })
+                <input type="date" name="fecha"
+                       value="@ViewBag.FechaSeleccionada"
+                       min="@DateTime.Now.ToString("yyyy-MM-dd")"
+                       max="2030-12-31"
+                       class="form-control veris-crear-input"
+                       onchange="this.form.submit();" />
+                <small class="form-text text-muted">
+                    Solo se permiten fechas desde hoy hasta el año 2030.
+                </small>
             </div>
         </div>
+    }
 
-        <!-- Hora de inicio -->
-        <div class="form-group row mb-3 veris-crear-group">
-            @Html.LabelFor(model => model.HI, "Hora Inicio", htmlAttributes: new { @class = "control-label col-md-3 veris-crear-label" })
-            <div class="col-md-9 veris-crear-input-col">
-                @Html.TextBoxFor(model => model.HI, "{0:hh\\:mm}", new { @class = "form-control veris-crear-input", type = "time" })
-                @Html.ValidationMessageFor(model => model.HI, "", new { @class = "text-danger d-block veris-crear-error" })
+    @* Mostrar horarios disponibles y formulario de confirmación *@
+    @{
+        var horarios = ViewBag.Horarios as List<string>;
+    }
+
+    @if (horarios != null && horarios.Count > 0)
+    {
+        <h4 class="mt-4 text-center" style="color: #1a73e8;">Horarios Disponibles</h4>
+
+        using (Html.BeginForm("Create", "Consulta", FormMethod.Post, new { @class = "veris-crear-form" }))
+        {
+            @Html.AntiForgeryToken()
+
+            @Html.Hidden("IdMedico", Request["idMedico"])
+            @Html.Hidden("IdPaciente", Request["idPaciente"])
+            @Html.Hidden("FechaConsulta", Request["fecha"])
+
+            <!-- Selección de horario -->
+            <div class="form-group row mb-3 veris-crear-group">
+                <label class="control-label col-md-3 veris-crear-label">Seleccione Horario</label>
+                <div class="col-md-9 veris-crear-input-col">
+                    <select class="form-control veris-crear-input" name="HI" required>
+                        <option value="">-- Seleccione un horario --</option>
+                        @foreach (var h in horarios)
+                        {
+                            <option value="@h">@h</option>
+                        }
+                    </select>
+                    <small class="form-text text-muted">
+                        La consulta tendrá una duración de una hora.
+                    </small>
+                </div>
             </div>
+
+            <!-- Diagnóstico -->
+            <div class="form-group row mb-4 veris-crear-group">
+                <label class="control-label col-md-3 veris-crear-label">Diagnóstico</label>
+                <div class="col-md-9 veris-crear-input-col">
+                    <textarea name="Diagnostico" rows="5" class="form-control veris-crear-input"
+                              placeholder="Describa el diagnóstico o hallazgos del paciente..." required
+                              maxlength="500"></textarea>
+                    <small class="form-text text-muted">
+                        Máximo 500 caracteres.
+                    </small>
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="form-group row text-center veris-crear-button-group mt-4">
+                <div class="col-md-12">
+                    <button type="submit" class="btn veris-crear-btn">
+                        <i class="bi bi-check-circle me-1"></i> Registrar Consulta
+                    </button>
+                    @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-outline-secondary veris-crear-back ms-2" })
+                </div>
+            </div>
+        }
+    }
+    else if (Request["idMedico"] != null && Request["fecha"] != null)
+    {
+        <div class="alert alert-warning mt-4 text-center">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <strong>No hay horarios disponibles</strong> para la fecha seleccionada.
+            <br />
+            <small>Intente con otra fecha o verifique que la especialidad trabaje ese día.</small>
         </div>
 
-        <!-- Hora final -->
-        <div class="form-group row mb-3 veris-crear-group">
-            @Html.LabelFor(model => model.HF, "Hora Fin", htmlAttributes: new { @class = "control-label col-md-3 veris-crear-label" })
-            <div class="col-md-9 veris-crear-input-col">
-                @Html.TextBoxFor(model => model.HF, "{0:hh\\:mm}", new { @class = "form-control veris-crear-input", type = "time" })
-                @Html.ValidationMessageFor(model => model.HF, "", new { @class = "text-danger d-block veris-crear-error" })
-            </div>
+        <div class="text-center mt-3">
+            @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-outline-secondary" })
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info mt-4 text-center">
+            <i class="bi bi-info-circle me-2"></i>
+            Por favor, seleccione un médico y una fecha para ver los horarios disponibles.
         </div>
 
-        <!-- Diagnóstico -->
-        <div class="form-group row mb-4 veris-crear-group">
-            @Html.LabelFor(model => model.Diagnostico, htmlAttributes: new { @class = "control-label col-md-3 veris-crear-label" })
-            <div class="col-md-9 veris-crear-input-col">
-                @Html.TextAreaFor(model => model.Diagnostico, 5, 50, new { @class = "form-control veris-crear-input", placeholder = "Describa el diagnóstico o hallazgos del paciente..." })
-                @Html.ValidationMessageFor(model => model.Diagnostico, "", new { @class = "text-danger d-block veris-crear-error" })
-            </div>
-        </div>
-
-        <!-- Botones -->
-        <div class="form-group row text-center veris-crear-button-group mt-4">
-            <div class="col-md-12">
-                <input type="submit" value="Registrar Consulta" class="btn veris-crear-btn" />
-                @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-outline-secondary veris-crear-back ms-2" })
-            </div>
+        <div class="text-center mt-3">
+            @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-outline-secondary" })
         </div>
     }
 </main>

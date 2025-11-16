@@ -84,10 +84,10 @@ namespace WebApplication02_Con_Autenticacion.Controllers
         }
 
         // =====================================================================
-        // CREAR CONSULTA
+        // CREAR CONSULTA (GET) - CON HORARIOS DINÁMICOS
         // =====================================================================
         [Authorize(Roles = "SuperAdmin, Medico")]
-        public ActionResult Create()
+        public ActionResult Create(int? idMedico, DateTime? fecha)
         {
             var usuario = SessionHelper.CurrentUser;
 
@@ -95,57 +95,164 @@ namespace WebApplication02_Con_Autenticacion.Controllers
 
             if (usuario != null && User.IsInRole("Medico") && !User.IsInRole("SuperAdmin"))
             {
-                var idMedico = db.medicos
+                var idMedicoActual = db.medicos
                     .Where(m => m.IdUsuario == usuario.Id)
                     .Select(m => m.IdMedico)
                     .FirstOrDefault();
 
                 ViewBag.IdMedico = new SelectList(
-                    db.medicos.Where(m => m.IdMedico == idMedico),
-                    "IdMedico", "Nombre"
+                    db.medicos.Where(m => m.IdMedico == idMedicoActual),
+                    "IdMedico", "Nombre", idMedicoActual
                 );
             }
             else
             {
-                ViewBag.IdMedico = new SelectList(db.medicos, "IdMedico", "Nombre");
+                ViewBag.IdMedico = new SelectList(db.medicos, "IdMedico", "Nombre", idMedico);
+            }
+
+            ViewBag.FechaSeleccionada = fecha?.ToString("yyyy-MM-dd");
+
+            // Generar horarios disponibles si médico + fecha seleccionados
+            if (idMedico.HasValue && fecha.HasValue)
+            {
+                ViewBag.Horarios = ObtenerHorariosDisponiblesParaCrear(idMedico.Value, fecha.Value);
+            }
+            else
+            {
+                ViewBag.Horarios = new List<string>();
             }
 
             return View();
         }
 
+        // =====================================================================
+        // CREAR CONSULTA (POST)
+        // =====================================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "SuperAdmin, Medico")]
-        public ActionResult Create([Bind(Include = "IdConsulta,IdMedico,IdPaciente,FechaConsulta,HI,HF,Diagnostico")] consultas consulta)
+        public ActionResult Create(int IdMedico, int IdPaciente, DateTime FechaConsulta, string HI, string Diagnostico)
         {
             var usuario = SessionHelper.CurrentUser;
 
+            // Si es médico sin privilegios de SuperAdmin, usar su propio ID
             if (usuario != null && User.IsInRole("Medico") && !User.IsInRole("SuperAdmin"))
             {
-                var idMedico = db.medicos
+                IdMedico = db.medicos
                     .Where(m => m.IdUsuario == usuario.Id)
                     .Select(m => m.IdMedico)
                     .FirstOrDefault();
-
-                consulta.IdMedico = idMedico;
             }
 
-            ViewBag.IdPaciente = new SelectList(db.pacientes, "IdPaciente", "Nombre", consulta.IdPaciente);
-            ViewBag.IdMedico = new SelectList(db.medicos, "IdMedico", "Nombre", consulta.IdMedico);
+            // ✅ VALIDACIÓN 1: Rango de años permitidos (2000-2030)
+            if (FechaConsulta.Year < 2000 || FechaConsulta.Year > 2030)
+            {
+                TempData["Error"] = "Solo se pueden registrar consultas entre los años 2000 y 2030.";
+                return RedirectToAction("Create", new { idMedico = IdMedico, fecha = FechaConsulta.ToString("yyyy-MM-dd") });
+            }
 
-            if (!consulta.HorarioValido())
-                ModelState.AddModelError("HF", "La hora de fin debe ser mayor que la hora de inicio.");
+            // ✅ VALIDACIÓN 2: La fecha DEBE ser desde hoy en adelante
+            if (FechaConsulta.Date < DateTime.Now.Date)
+            {
+                TempData["Error"] = "No se pueden registrar consultas con fechas pasadas.";
+                return RedirectToAction("Create", new { idMedico = IdMedico, fecha = FechaConsulta.ToString("yyyy-MM-dd") });
+            }
 
-            if (!consulta.FechaValida())
-                ModelState.AddModelError("FechaConsulta", "La fecha de la consulta no puede ser futura.");
+            // ✅ VALIDACIÓN 3: No permitir sábados y domingos
+            if (FechaConsulta.DayOfWeek == DayOfWeek.Saturday || FechaConsulta.DayOfWeek == DayOfWeek.Sunday)
+            {
+                TempData["Error"] = "No se pueden registrar consultas en sábados o domingos.";
+                return RedirectToAction("Create", new { idMedico = IdMedico, fecha = FechaConsulta.ToString("yyyy-MM-dd") });
+            }
 
-            if (!ModelState.IsValid)
-                return View(consulta);
+            TimeSpan horaInicio = TimeSpan.Parse(HI);
+            TimeSpan horaFin = horaInicio.Add(TimeSpan.FromHours(1));
+
+            // ✅ VALIDACIÓN 4: Verificar que el horario esté dentro del rango permitido (8:00 - 18:00)
+            TimeSpan horaMinima = TimeSpan.FromHours(8);
+            TimeSpan horaMaxima = TimeSpan.FromHours(18);
+
+            if (horaInicio < horaMinima || horaInicio >= horaMaxima)
+            {
+                TempData["Error"] = "La hora de inicio debe estar entre las 08:00 y las 18:00.";
+                return RedirectToAction("Create", new { idMedico = IdMedico, fecha = FechaConsulta.ToString("yyyy-MM-dd") });
+            }
+
+            // ✅ VALIDACIÓN 5: Verificar que no haya conflictos de horario
+            var consultasExistentes = db.consultas
+                .Where(c => c.IdMedico == IdMedico && c.FechaConsulta == FechaConsulta && c.HI == horaInicio)
+                .Any();
+
+            if (consultasExistentes)
+            {
+                TempData["Error"] = "Ya existe una consulta en ese horario para este médico.";
+                return RedirectToAction("Create", new { idMedico = IdMedico, fecha = FechaConsulta.ToString("yyyy-MM-dd") });
+            }
+
+            consultas consulta = new consultas
+            {
+                IdMedico = IdMedico,
+                IdPaciente = IdPaciente,
+                FechaConsulta = FechaConsulta,
+                HI = horaInicio,
+                HF = horaFin,
+                Diagnostico = Diagnostico
+            };
 
             db.consultas.Add(consulta);
             db.SaveChanges();
 
+            TempData["Mensaje"] = "✅ Consulta registrada correctamente.";
             return RedirectToAction("Index");
+        }
+
+        // =====================================================================
+        // HORARIOS DISPONIBLES PARA CREAR (permite fechas pasadas)
+        // =====================================================================
+        private List<string> ObtenerHorariosDisponiblesParaCrear(int idMedico, DateTime fecha)
+        {
+            List<string> horarios = new List<string>();
+
+            // ✅ PERMITIR SOLO FECHAS DESDE HOY EN ADELANTE
+            if (fecha < DateTime.Today)
+                return horarios;
+
+            if (fecha.DayOfWeek == DayOfWeek.Saturday || fecha.DayOfWeek == DayOfWeek.Sunday)
+                return horarios;
+
+            var medico = db.medicos.Find(idMedico);
+
+            if (medico == null)
+                return horarios;
+
+            var especialidad = db.especialidades.Find(medico.IdEspecialidad);
+
+            if (especialidad == null)
+                return horarios;
+
+            if (!EspecialidadTrabajaEseDia(especialidad, fecha))
+                return horarios;
+
+            TimeSpan inicio = especialidad.Franja_HI < TimeSpan.FromHours(8)
+                ? TimeSpan.FromHours(8)
+                : especialidad.Franja_HI;
+
+            TimeSpan fin = especialidad.Franja_HF > TimeSpan.FromHours(18)
+                ? TimeSpan.FromHours(18)
+                : especialidad.Franja_HF;
+
+            var ocupadas = db.consultas
+                .Where(c => c.IdMedico == idMedico && c.FechaConsulta == fecha)
+                .Select(c => c.HI)
+                .ToList();
+
+            for (var hora = inicio; hora < fin; hora = hora.Add(TimeSpan.FromHours(1)))
+            {
+                if (!ocupadas.Contains(hora))
+                    horarios.Add(hora.ToString(@"hh\:mm"));
+            }
+
+            return horarios;
         }
 
         // =====================================================================
@@ -308,12 +415,13 @@ namespace WebApplication02_Con_Autenticacion.Controllers
         }
 
         // =====================================================================
-        // HORARIOS DISPONIBLES
+        // HORARIOS DISPONIBLES PARA AGENDAR (solo fechas futuras)
         // =====================================================================
         private List<string> ObtenerHorariosDisponibles(int idMedico, DateTime fecha)
         {
             List<string> horarios = new List<string>();
 
+            // ✅ Validación: Solo fechas desde hoy en adelante
             if (fecha < DateTime.Today)
                 return horarios;
 
@@ -478,12 +586,18 @@ namespace WebApplication02_Con_Autenticacion.Controllers
         // =====================================================================
         private bool EspecialidadTrabajaEseDia(especialidades esp, DateTime fecha)
         {
+            if (esp == null || string.IsNullOrWhiteSpace(esp.Dias))
+                return false;
+
             string dia = DiaEnEspanol(fecha.DayOfWeek);
             string dias = esp.Dias;
 
             if (dias.Contains(" a "))
             {
                 var partes = dias.Split(new string[] { " a " }, StringSplitOptions.None);
+                if (partes.Length < 2)
+                    return false;
+
                 string inicio = partes[0].Trim();
                 string fin = partes[1].Trim();
 
@@ -495,6 +609,9 @@ namespace WebApplication02_Con_Autenticacion.Controllers
                 int posDia = orden.IndexOf(dia);
                 int posInicio = orden.IndexOf(inicio);
                 int posFin = orden.IndexOf(fin);
+
+                if (posDia == -1 || posInicio == -1 || posFin == -1)
+                    return false;
 
                 return posDia >= posInicio && posDia <= posFin;
             }
