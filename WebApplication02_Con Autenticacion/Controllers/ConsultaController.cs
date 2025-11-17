@@ -166,21 +166,21 @@ namespace WebApplication02_Con_Autenticacion.Controllers
                     .FirstOrDefault();
             }
 
-            // ✅ VALIDACIÓN 1: Rango de años permitidos (2000-2030)
+            // VALIDACIÓN 1: Rango de años permitidos (2000-2030)
             if (FechaConsulta.Year < 2000 || FechaConsulta.Year > 2030)
             {
                 TempData["Error"] = "Solo se pueden registrar consultas entre los años 2000 y 2030.";
                 return RedirectToAction("Create", new { idMedico = IdMedico, fecha = FechaConsulta.ToString("yyyy-MM-dd") });
             }
 
-            // ✅ VALIDACIÓN 2: La fecha DEBE ser desde hoy en adelante
+            // VALIDACIÓN 2: La fecha DEBE ser desde hoy en adelante
             if (FechaConsulta.Date < DateTime.Now.Date)
             {
                 TempData["Error"] = "No se pueden registrar consultas con fechas pasadas.";
                 return RedirectToAction("Create", new { idMedico = IdMedico, fecha = FechaConsulta.ToString("yyyy-MM-dd") });
             }
 
-            // ✅ VALIDACIÓN 3: No permitir sábados y domingos
+            // VALIDACIÓN 3: No permitir sábados y domingos
             if (FechaConsulta.DayOfWeek == DayOfWeek.Saturday || FechaConsulta.DayOfWeek == DayOfWeek.Sunday)
             {
                 TempData["Error"] = "No se pueden registrar consultas en sábados o domingos.";
@@ -190,7 +190,7 @@ namespace WebApplication02_Con_Autenticacion.Controllers
             TimeSpan horaInicio = TimeSpan.Parse(HI);
             TimeSpan horaFin = horaInicio.Add(TimeSpan.FromHours(1));
 
-            // ✅ VALIDACIÓN 4: Verificar que el horario esté dentro del rango permitido (8:00 - 18:00)
+            // VALIDACIÓN 4: Verificar que el horario esté dentro del rango permitido (8:00 - 18:00)
             TimeSpan horaMinima = TimeSpan.FromHours(8);
             TimeSpan horaMaxima = TimeSpan.FromHours(18);
 
@@ -200,7 +200,7 @@ namespace WebApplication02_Con_Autenticacion.Controllers
                 return RedirectToAction("Create", new { idMedico = IdMedico, fecha = FechaConsulta.ToString("yyyy-MM-dd") });
             }
 
-            // ✅ VALIDACIÓN 5: Verificar que no haya conflictos de horario
+            // VALIDACIÓN 5: Verificar que no haya conflictos de horario
             var consultasExistentes = db.consultas
                 .Where(c => c.IdMedico == IdMedico && c.FechaConsulta == FechaConsulta && c.HI == horaInicio)
                 .Any();
@@ -224,7 +224,7 @@ namespace WebApplication02_Con_Autenticacion.Controllers
             db.consultas.Add(consulta);
             db.SaveChanges();
 
-            TempData["Mensaje"] = "✅ Consulta registrada correctamente.";
+            TempData["Mensaje"] = "Consulta registrada correctamente.";
             return RedirectToAction("Index");
         }
 
@@ -235,7 +235,7 @@ namespace WebApplication02_Con_Autenticacion.Controllers
         {
             List<string> horarios = new List<string>();
 
-            // ✅ PERMITIR SOLO FECHAS DESDE HOY EN ADELANTE
+            // PERMITIR SOLO FECHAS DESDE HOY EN ADELANTE
             if (fecha < DateTime.Today)
                 return horarios;
 
@@ -375,7 +375,7 @@ namespace WebApplication02_Con_Autenticacion.Controllers
         }
 
         // =====================================================================
-        // AGENDAR CONSULTA (GET) — ***MODIFICADO PARA NAVEGAR ENTRE MESES***
+        // AGENDAR CONSULTA (GET)
         // =====================================================================
         [Authorize(Roles = "Paciente")]
         public ActionResult Agendar(int? idEspecialidad, int? idMedico, DateTime? fecha, int? mes, int? anio)
@@ -407,14 +407,14 @@ namespace WebApplication02_Con_Autenticacion.Controllers
             int mesActual = mes ?? hoy.Month;
             int anioActual = anio ?? hoy.Year;
 
-            // ✅ VALIDACIÓN: No permitir años mayores a 2030
+            //VALIDACIÓN: No permitir años mayores a 2030
             if (anioActual > 2030)
             {
                 anioActual = 2030;
                 mesActual = 12;
             }
 
-            // ✅ VALIDACIÓN: No permitir años menores a año actual
+            // VALIDACIÓN: No permitir años menores a año actual
             if (anioActual < hoy.Year)
             {
                 anioActual = hoy.Year;
@@ -425,10 +425,10 @@ namespace WebApplication02_Con_Autenticacion.Controllers
             ViewBag.Anio = anioActual;
             ViewBag.NombreMes = new DateTime(anioActual, mesActual, 1).ToString("MMMM yyyy", new System.Globalization.CultureInfo("es-ES"));
 
-            // ✅ Verificar si estamos en diciembre 2030 (para deshabilitar botón siguiente)
+            // Verificar si estamos en diciembre 2030 (para deshabilitar botón siguiente)
             ViewBag.EsUltimoMes = (anioActual == 2030 && mesActual == 12);
 
-            // ✅ Verificar si estamos en el mes actual (para deshabilitar botón anterior)
+            // Verificar si estamos en el mes actual (para deshabilitar botón anterior)
             ViewBag.EsPrimerMes = (anioActual == hoy.Year && mesActual == hoy.Month);
 
             // Obtener días con horarios disponibles
@@ -443,7 +443,7 @@ namespace WebApplication02_Con_Autenticacion.Controllers
                 {
                     DateTime fechaTemp = new DateTime(anioActual, mesActual, d);
 
-                    // ✅ No incluir fechas posteriores a 2030-12-31
+                    // No incluir fechas posteriores a 2030-12-31
                     if (fechaTemp.Year > 2030 || (fechaTemp.Year == 2030 && fechaTemp.Month == 12 && fechaTemp.Day > 31))
                         continue;
 
@@ -484,7 +484,7 @@ namespace WebApplication02_Con_Autenticacion.Controllers
         {
             List<string> horarios = new List<string>();
 
-            // ✅ Validación: Solo fechas desde hoy en adelante
+            // Validación: Solo fechas desde hoy en adelante
             if (fecha < DateTime.Today)
                 return horarios;
 
@@ -576,7 +576,7 @@ namespace WebApplication02_Con_Autenticacion.Controllers
 
             // Obtener el día de la semana del primer día (Lunes = 1, Domingo = 7)
             int diaSemana = (int)primerDia.DayOfWeek;
-            if (diaSemana == 0) diaSemana = 7; // Domingo es 7 en vez de 0
+            if (diaSemana == 0) diaSemana = 7;
 
             List<string> semana = new List<string>();
 

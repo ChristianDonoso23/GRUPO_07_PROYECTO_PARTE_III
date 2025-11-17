@@ -94,7 +94,7 @@ namespace WebApplication02_Con_Autenticacion.Controllers
             // Si el rol no corresponde al módulo, mostrar error
             if (!accesoValido)
             {
-                ModelState.AddModelError("", $"⚠️ No puede iniciar sesión en el módulo '{modulo}', su rol asignado es '{rolUsuario}'.");
+                ModelState.AddModelError("", $"No puede iniciar sesión en el módulo '{modulo}', su rol asignado es '{rolUsuario}'.");
                 return View(model);
             }
 
