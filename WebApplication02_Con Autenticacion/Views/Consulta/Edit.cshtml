@@ -8,7 +8,7 @@
 <main class="container my-5 veris-editar-container">
     <div class="veris-editar-card shadow-lg p-4 rounded">
         <h2 class="veris-editar-title text-center mb-3">Editar Consulta Médica</h2>
-        <p class="veris-editar-subtitle text-center">Modifique los datos necesarios y guarde los cambios.</p>
+        <p class="veris-editar-subtitle text-center">Solo puede modificar el diagnóstico. Los demás datos no son editables.</p>
         <hr class="veris-editar-divider" />
 
         @using (Html.BeginForm("Edit", "Consulta", FormMethod.Post, new { @class = "form-horizontal veris-editar-form" }))
@@ -18,57 +18,63 @@
 
             @Html.ValidationSummary(true, "", new { @class = "text-danger veris-editar-validation" })
 
-            <!-- Médico -->
+            <!-- Médico (BLOQUEADO) -->
             <div class="form-group row mb-3 veris-editar-group">
                 @Html.LabelFor(model => model.IdMedico, "Médico", htmlAttributes: new { @class = "control-label col-md-3 veris-editar-label" })
                 <div class="col-md-9 veris-editar-input-col">
-                    @Html.DropDownList("IdMedico", null, "-- Seleccione un médico --", htmlAttributes: new { @class = "form-control veris-editar-input" })
-                    @Html.ValidationMessageFor(model => model.IdMedico, "", new { @class = "text-danger d-block veris-editar-error" })
+                    @Html.DropDownList("IdMedico", null, "-- Seleccione un médico --", htmlAttributes: new { @class = "form-control veris-editar-input", @disabled = "disabled" })
+                    @Html.HiddenFor(model => model.IdMedico)
+                    <small class="text-muted d-block mt-1">Este campo no puede ser modificado</small>
                 </div>
             </div>
 
-            <!-- Paciente -->
+            <!-- Paciente (BLOQUEADO) -->
             <div class="form-group row mb-3 veris-editar-group">
                 @Html.LabelFor(model => model.IdPaciente, "Paciente", htmlAttributes: new { @class = "control-label col-md-3 veris-editar-label" })
                 <div class="col-md-9 veris-editar-input-col">
-                    @Html.DropDownList("IdPaciente", null, "-- Seleccione un paciente --", htmlAttributes: new { @class = "form-control veris-editar-input" })
-                    @Html.ValidationMessageFor(model => model.IdPaciente, "", new { @class = "text-danger d-block veris-editar-error" })
+                    @Html.DropDownList("IdPaciente", null, "-- Seleccione un paciente --", htmlAttributes: new { @class = "form-control veris-editar-input", @disabled = "disabled" })
+                    @Html.HiddenFor(model => model.IdPaciente)
+                    <small class="text-muted d-block mt-1">Este campo no puede ser modificado</small>
                 </div>
             </div>
 
-            <!-- Fecha de la consulta -->
+            <!-- Fecha de la consulta (BLOQUEADA) -->
             <div class="form-group row mb-3 veris-editar-group">
                 @Html.LabelFor(model => model.FechaConsulta, htmlAttributes: new { @class = "control-label col-md-3 veris-editar-label" })
                 <div class="col-md-9 veris-editar-input-col">
-                    @Html.TextBoxFor(model => model.FechaConsulta, "{0:yyyy-MM-dd}", new { @class = "form-control veris-editar-input", type = "date" })
+                    @Html.TextBoxFor(model => model.FechaConsulta, "{0:yyyy-MM-dd}", new { @class = "form-control veris-editar-input", type = "date", @readonly = "readonly" })
                     @Html.ValidationMessageFor(model => model.FechaConsulta, "", new { @class = "text-danger d-block veris-editar-error" })
+                    <small class="text-muted d-block mt-1">Este campo no puede ser modificado</small>
                 </div>
             </div>
 
-            <!-- Hora de inicio -->
+            <!-- Hora de inicio (BLOQUEADA) -->
             <div class="form-group row mb-3 veris-editar-group">
                 @Html.LabelFor(model => model.HI, "Hora de Inicio", htmlAttributes: new { @class = "control-label col-md-3 veris-editar-label" })
                 <div class="col-md-9 veris-editar-input-col">
-                    @Html.TextBoxFor(model => model.HI, "{0:hh\\:mm}", new { @class = "form-control veris-editar-input", type = "time" })
+                    @Html.TextBoxFor(model => model.HI, "{0:hh\\:mm}", new { @class = "form-control veris-editar-input", type = "time", @readonly = "readonly" })
                     @Html.ValidationMessageFor(model => model.HI, "", new { @class = "text-danger d-block veris-editar-error" })
+                    <small class="text-muted d-block mt-1">Este campo no puede ser modificado</small>
                 </div>
             </div>
 
-            <!-- Hora de finalización -->
+            <!-- Hora de finalización (BLOQUEADA) -->
             <div class="form-group row mb-3 veris-editar-group">
                 @Html.LabelFor(model => model.HF, "Hora de Finalización", htmlAttributes: new { @class = "control-label col-md-3 veris-editar-label" })
                 <div class="col-md-9 veris-editar-input-col">
-                    @Html.TextBoxFor(model => model.HF, "{0:hh\\:mm}", new { @class = "form-control veris-editar-input", type = "time" })
+                    @Html.TextBoxFor(model => model.HF, "{0:hh\\:mm}", new { @class = "form-control veris-editar-input", type = "time", @readonly = "readonly" })
                     @Html.ValidationMessageFor(model => model.HF, "", new { @class = "text-danger d-block veris-editar-error" })
+                    <small class="text-muted d-block mt-1">Este campo no puede ser modificado</small>
                 </div>
             </div>
 
-            <!-- Diagnóstico -->
+            <!-- Diagnóstico (ÚNICO CAMPO EDITABLE) ✅ -->
             <div class="form-group row mb-4 veris-editar-group">
                 @Html.LabelFor(model => model.Diagnostico, htmlAttributes: new { @class = "control-label col-md-3 veris-editar-label" })
                 <div class="col-md-9 veris-editar-input-col">
                     @Html.TextAreaFor(model => model.Diagnostico, 5, 50, new { @class = "form-control veris-editar-input", placeholder = "Actualice el diagnóstico o hallazgos..." })
                     @Html.ValidationMessageFor(model => model.Diagnostico, "", new { @class = "text-danger d-block veris-editar-error" })
+                    <small class="text-success d-block mt-1">Este es el único campo que puede modificar</small>
                 </div>
             </div>
 
