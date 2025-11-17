@@ -1,30 +1,47 @@
 ﻿@using Microsoft.AspNet.Identity
 @using Microsoft.AspNet.Identity.EntityFramework
 @using WebApplication02_Con_Autenticacion.Models
+
 @if (Request.IsAuthenticated)
 {
     using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
     {
         @Html.AntiForgeryToken()
-
         <ul class="navbar-nav navbar-right">
-
             @{
                 // VARIABLE SESSION
                 var IdUsuario = User.Identity.GetUserId();
-
                 ApplicationDbContext db = new ApplicationDbContext();
                 var usermanager = new UserManager<ApplicationUser>(new UserStore<ApplicationUser>(db));
                 var objUser = usermanager.FindById(IdUsuario);
-
                 HttpContext.Current.Session["User"] = objUser;
-
                 var nombre = objUser.UserName;
                 var info = objUser.PhoneNumber;
 
+                // Obtener el rol principal del usuario
+                var roles = usermanager.GetRoles(IdUsuario);
+                string rolBadge = "";
+
+                if (roles.Contains("SuperAdmin"))
+                {
+                    rolBadge = "<span class='badge bg-danger'>SuperAdministrador</span>";
+                }
+                else if (roles.Contains("Administrador"))
+                {
+                    rolBadge = "<span class='badge bg-warning text-dark'>Administrador</span>";
+                }
+                else if (roles.Contains("Medico"))
+                {
+                    rolBadge = "<span class='badge bg-info text-dark'>Médico</span>";
+                }
+                else if (roles.Contains("Paciente"))
+                {
+                    rolBadge = "<span class='badge bg-success'>Paciente</span>";
+                }
             }
             <li>
                 @Html.ActionLink("Hola " + nombre + "!", "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage", @class = "nav-link" })
+                <div style="text-align: center; margin-top: -5px;">@Html.Raw(rolBadge)</div>
             </li>
             <li>
                 <a class="nav-link" href="javascript:document.getElementById('logoutForm').submit()">Cerrar sesión</a>

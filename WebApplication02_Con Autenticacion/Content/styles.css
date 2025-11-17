@@ -1085,3 +1085,20 @@ footer {
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+/* Estilos para badges de roles en footer */
+.footer-bottom .badge {
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.social-icon {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+    .social-icon:hover {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+

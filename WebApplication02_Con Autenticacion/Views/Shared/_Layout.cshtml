@@ -116,22 +116,65 @@
 
     <!-- FOOTER VERIS -->
     <footer class="footer-veris">
-        <!-- Franja superior con redes -->
-        <div class="footer-top text-center text-white py-3 bg-primary">
-            <h6 class="mb-2">Encuentra nuestras redes sociales</h6>
-            <div class="d-flex justify-content-center gap-3">
-                <a href="#" class="social-icon text-white"><i class="bi bi-whatsapp"></i></a>
-                <a href="#" class="social-icon text-white"><i class="bi bi-facebook"></i></a>
-                <a href="#" class="social-icon text-white"><i class="bi bi-instagram"></i></a>
-                <a href="#" class="social-icon text-white"><i class="bi bi-twitter"></i></a>
-                <a href="#" class="social-icon text-white"><i class="bi bi-youtube"></i></a>
+        @if (User.IsInRole("SuperAdmin"))
+        {
+            <!-- Footer para SUPERADMIN -->
+            <div class="footer-bottom text-center text-white py-3 bg-dark">
+                <div class="d-flex flex-column flex-md-row justify-content-center align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-shield-check-fill text-danger" style="font-size: 1.2rem;"></i>
+                        <span class="badge bg-danger">Modo SuperAdministrador</span>
+                    </div>
+                    <span class="d-none d-md-inline mx-2">|</span>
+                    <small>© @DateTime.Now.Year - Proyecto VERIS</small>
+                </div>
             </div>
-        </div>
-
-        <!-- Franja inferior -->
-        <div class="footer-bottom text-center text-white py-3 bg-dark">
-            © @DateTime.Now.Year - Proyecto VERIS
-        </div>
+        }
+        else if (User.IsInRole("Administrador"))
+        {
+            <!-- Footer para ADMINISTRADOR -->
+            <div class="footer-bottom text-center text-white py-3 bg-dark">
+                <div class="d-flex flex-column flex-md-row justify-content-center align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-shield-lock-fill text-warning" style="font-size: 1.2rem;"></i>
+                        <span class="badge bg-warning text-dark">Modo Administrador</span>
+                    </div>
+                    <span class="d-none d-md-inline mx-2">|</span>
+                    <small>© @DateTime.Now.Year - Proyecto VERIS</small>
+                </div>
+            </div>
+        }
+        else if (User.IsInRole("Medico"))
+        {
+            <!-- Footer para MEDICO -->
+            <div class="footer-bottom text-center text-white py-3 bg-dark">
+                <div class="d-flex flex-column flex-md-row justify-content-center align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-person-badge-fill text-info" style="font-size: 1.2rem;"></i>
+                        <span class="badge bg-info text-dark">Modo Médico</span>
+                    </div>
+                    <span class="d-none d-md-inline mx-2">|</span>
+                    <small>© @DateTime.Now.Year - Proyecto VERIS</small>
+                </div>
+            </div>
+        }
+        else if (User.IsInRole("Paciente") || !User.Identity.IsAuthenticated)
+        {
+            <!-- Footer para PACIENTES y usuarios NO autenticados -->
+            <div class="footer-top text-center text-white py-3 bg-primary">
+                <h6 class="mb-2">Encuentra nuestras redes sociales</h6>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="#" class="social-icon text-white" title="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+                    <a href="#" class="social-icon text-white" title="Facebook"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="social-icon text-white" title="Instagram"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="social-icon text-white" title="Twitter"><i class="bi bi-twitter"></i></a>
+                    <a href="#" class="social-icon text-white" title="YouTube"><i class="bi bi-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-bottom text-center text-white py-3 bg-dark">
+                © @DateTime.Now.Year - Proyecto VERIS - Hacemos fácil cuidarte
+            </div>
+        }
     </footer>
 
     <!-- Bootstrap JS -->
