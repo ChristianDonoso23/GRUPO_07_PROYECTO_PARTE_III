@@ -14,38 +14,93 @@
     {
         @Html.AntiForgeryToken()
         @Html.HiddenFor(model => model.IdEspecialidad)
-
         @Html.ValidationSummary(true, "", new { @class = "text-danger veris-crear-validation" })
 
-        <!-- 🔹 Descripción -->
+        <!-- Descripción -->
         <div class="form-group mb-3">
             @Html.LabelFor(model => model.Descripcion, htmlAttributes: new { @class = "veris-crear-label" })
             @Html.EditorFor(model => model.Descripcion, new { htmlAttributes = new { @class = "form-control veris-crear-input", placeholder = "Ejemplo: Cardiología" } })
             @Html.ValidationMessageFor(model => model.Descripcion, "", new { @class = "text-danger veris-crear-error" })
         </div>
 
-        <!-- 🔹 Días -->
+        <!-- Días de atención -->
         <div class="form-group mb-3">
-            @Html.LabelFor(model => model.Dias, htmlAttributes: new { @class = "veris-crear-label" })
-            @Html.EditorFor(model => model.Dias, new { htmlAttributes = new { @class = "form-control veris-crear-input", placeholder = "Ejemplo: Lunes a Viernes" } })
+            <label class="veris-crear-label">Días de Atención</label>
+            <div class="card p-3">
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <div class="form-check">
+                            <input class="form-check-input dia-checkbox" type="checkbox" value="Lunes" id="diaLunes">
+                            <label class="form-check-label" for="diaLunes">
+                                <i class="bi bi-calendar-day"></i> Lunes
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="form-check">
+                            <input class="form-check-input dia-checkbox" type="checkbox" value="Martes" id="diaMartes">
+                            <label class="form-check-label" for="diaMartes">
+                                <i class="bi bi-calendar-day"></i> Martes
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="form-check">
+                            <input class="form-check-input dia-checkbox" type="checkbox" value="Miércoles" id="diaMiercoles">
+                            <label class="form-check-label" for="diaMiercoles">
+                                <i class="bi bi-calendar-day"></i> Miércoles
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="form-check">
+                            <input class="form-check-input dia-checkbox" type="checkbox" value="Jueves" id="diaJueves">
+                            <label class="form-check-label" for="diaJueves">
+                                <i class="bi bi-calendar-day"></i> Jueves
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="form-check">
+                            <input class="form-check-input dia-checkbox" type="checkbox" value="Viernes" id="diaViernes">
+                            <label class="form-check-label" for="diaViernes">
+                                <i class="bi bi-calendar-day"></i> Viernes
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de acceso rápido -->
+                <div class="mt-3 text-center">
+                    <button type="button" class="btn btn-sm btn-outline-primary me-2" onclick="seleccionarLunesViernes()">
+                        <i class="bi bi-check-square"></i> Lunes a Viernes
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="limpiarSeleccion()">
+                        <i class="bi bi-x-square"></i> Limpiar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Campo oculto que guardará los días seleccionados -->
+            @Html.Hidden("Dias", Model.Dias, new { id = "diasSeleccionados" })
             @Html.ValidationMessageFor(model => model.Dias, "", new { @class = "text-danger veris-crear-error" })
         </div>
 
-        <!-- 🔹 Franja horaria inicio -->
+        <!-- Franja horaria inicio -->
         <div class="form-group mb-3">
-            @Html.LabelFor(model => model.Franja_HI, htmlAttributes: new { @class = "veris-crear-label" })
+            @Html.LabelFor(model => model.Franja_HI, "Hora de Inicio", htmlAttributes: new { @class = "veris-crear-label" })
             @Html.EditorFor(model => model.Franja_HI, new { htmlAttributes = new { @class = "form-control veris-crear-input", type = "time" } })
             @Html.ValidationMessageFor(model => model.Franja_HI, "", new { @class = "text-danger veris-crear-error" })
         </div>
 
-        <!-- 🔹 Franja horaria fin -->
+        <!-- Franja horaria fin -->
         <div class="form-group mb-4">
-            @Html.LabelFor(model => model.Franja_HF, htmlAttributes: new { @class = "veris-crear-label" })
+            @Html.LabelFor(model => model.Franja_HF, "Hora de Fin", htmlAttributes: new { @class = "veris-crear-label" })
             @Html.EditorFor(model => model.Franja_HF, new { htmlAttributes = new { @class = "form-control veris-crear-input", type = "time" } })
             @Html.ValidationMessageFor(model => model.Franja_HF, "", new { @class = "text-danger veris-crear-error" })
         </div>
 
-        <!-- 🔹 Botones -->
+        <!-- Botones -->
         <div class="veris-crear-button-group text-center mt-4">
             <input type="submit" value="Guardar Cambios" class="btn veris-crear-btn" />
             @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-outline-secondary ms-2" })
@@ -55,4 +110,5 @@
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/especialidad-dias.js"></script>
 }

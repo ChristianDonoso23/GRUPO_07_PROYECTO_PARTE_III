@@ -23,6 +23,7 @@
                     <th>@Html.DisplayNameFor(model => model.Cantidad)</th>
                     <th>@Html.DisplayNameFor(model => model.consultas.Diagnostico)</th>
                     <th>@Html.DisplayNameFor(model => model.medicamentos.Nombre)</th>
+                    <th>@Html.DisplayName("Médico")</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -34,6 +35,7 @@
                         <td>@Html.DisplayFor(modelItem => item.Cantidad)</td>
                         <td>@Html.DisplayFor(modelItem => item.consultas.Diagnostico)</td>
                         <td>@Html.DisplayFor(modelItem => item.medicamentos.Nombre)</td>
+                        <td>@Html.DisplayFor(modelItem => item.consultas.medicos.Nombre)</td>
 
                         <td class="veris-tabla-acciones">
                             <!-- Todos los roles pueden ver detalles -->

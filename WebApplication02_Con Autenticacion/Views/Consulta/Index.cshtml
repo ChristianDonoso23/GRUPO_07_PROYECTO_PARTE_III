@@ -23,6 +23,7 @@
                     <th>@Html.DisplayNameFor(model => model.FechaConsulta)</th>
                     <th>@Html.DisplayNameFor(model => model.HI)</th>
                     <th>@Html.DisplayNameFor(model => model.HF)</th>
+                    <th>@Html.DisplayName("Especialidad") </th>
                     <th>@Html.DisplayNameFor(model => model.Diagnostico)</th>
                     <th>@Html.DisplayName("Paciente")</th>
                     <th>@Html.DisplayName("Médico")</th>
@@ -37,6 +38,7 @@
                         <td>@Html.DisplayFor(modelItem => item.FechaConsulta)</td>
                         <td>@Html.DisplayFor(modelItem => item.HI)</td>
                         <td>@Html.DisplayFor(modelItem => item.HF)</td>
+                        <td>@Html.DisplayFor(modelItem => item.medicos.especialidades.Descripcion)</td>
                         <td>@Html.DisplayFor(modelItem => item.Diagnostico)</td>
                         <td>@Html.DisplayFor(modelItem => item.pacientes.Nombre)</td>
                         <td>@Html.DisplayFor(modelItem => item.medicos.Nombre)</td>

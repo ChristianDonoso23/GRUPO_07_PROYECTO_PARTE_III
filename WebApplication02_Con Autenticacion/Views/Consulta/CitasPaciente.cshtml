@@ -23,6 +23,7 @@
                         <th>Fecha</th>
                         <th>Hora Inicio</th>
                         <th>Hora Fin</th>
+                        <th>Especialidad</th>
                         <th>Diagnóstico</th>
                         <th>Médico</th>
                     </tr>
@@ -34,6 +35,7 @@
                             <td>@item.FechaConsulta.ToShortDateString()</td>
                             <td>@item.HI</td>
                             <td>@item.HF</td>
+                            <td>@item.medicos.especialidades.Descripcion</td>
                             <td>@item.Diagnostico</td>
                             <td>@(item.medicos != null ? item.medicos.Nombre : "Sin asignar")</td>
                         </tr>
