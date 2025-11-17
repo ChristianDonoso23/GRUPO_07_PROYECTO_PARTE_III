@@ -18,7 +18,16 @@ namespace WebApplication02_Con_Autenticacion.Controllers
         // GET: Medicamento
         public ActionResult Index()
         {
-            return View(db.medicamentos.ToList());
+            try
+            {
+                var lista = db.medicamentos.ToList();
+                return View(lista);
+            }
+            catch (Exception ex)
+            {
+                var errorInfo = new HandleErrorInfo(ex, "Medicamentos", "Index");
+                return View("~/Views/Shared/Error.cshtml", errorInfo);
+            }
         }
 
         // GET: Medicamento/Details/5

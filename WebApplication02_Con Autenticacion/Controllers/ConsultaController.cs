@@ -21,48 +21,69 @@ namespace WebApplication02_Con_Autenticacion.Controllers
         [Authorize(Roles = "SuperAdmin, Administrador, Medico")]
         public ActionResult Index()
         {
-            var usuario = SessionHelper.CurrentUser;
-            IQueryable<consultas> consultasQuery;
-
-            if (usuario == null)
-                return RedirectToAction("Login", "Account");
-
-            if (User.IsInRole("SuperAdmin") || User.IsInRole("Administrador"))
+            try
             {
-                consultasQuery = db.consultas;
-            }
-            else if (User.IsInRole("Medico"))
-            {
-                var idMedico = db.medicos
-                    .Where(m => m.IdUsuario == usuario.Id)
-                    .Select(m => m.IdMedico)
-                    .FirstOrDefault();
+                // --------------------------
+                // VALIDACIÓN DE SESIÓN
+                // --------------------------
+                var usuario = SessionHelper.CurrentUser;
+                if (usuario == null)
+                    return RedirectToAction("Login", "Account");
 
-                consultasQuery = db.consultas.Where(c => c.IdMedico == idMedico);
-            }
-            else
-            {
-                consultasQuery = Enumerable.Empty<consultas>().AsQueryable();
-            }
+                IQueryable<consultas> consultasQuery;
 
-            var lista = consultasQuery
-                .ToList()
-                .Select(c => new consultas
+                // --------------------------
+                // ROLES: ADMINISTRADORES
+                // --------------------------
+                if (User.IsInRole("SuperAdmin") || User.IsInRole("Administrador"))
                 {
-                    IdConsulta = c.IdConsulta,
-                    IdMedico = c.IdMedico,
-                    IdPaciente = c.IdPaciente,
-                    FechaConsulta = c.FechaConsulta,
-                    HI = c.HI,
-                    HF = c.HF,
-                    Diagnostico = c.Diagnostico,
-                    pacientes = db.pacientes.FirstOrDefault(p => p.IdPaciente == c.IdPaciente),
-                    medicos = db.medicos.FirstOrDefault(m => m.IdMedico == c.IdMedico)
-                })
-                .ToList();
+                    consultasQuery = db.consultas
+                        .Include(c => c.pacientes)
+                        .Include(c => c.medicos);
+                }
+                // --------------------------
+                // ROL: MÉDICO
+                // --------------------------
+                else if (User.IsInRole("Medico"))
+                {
+                    var idMedico = db.medicos
+                        .Where(m => m.IdUsuario == usuario.Id)
+                        .Select(m => m.IdMedico)
+                        .FirstOrDefault();
 
-            return View(lista);
+                    if (idMedico == 0)
+                    {
+                        // Médico sin registro → lista vacía
+                        consultasQuery = Enumerable.Empty<consultas>().AsQueryable();
+                    }
+                    else
+                    {
+                        consultasQuery = db.consultas
+                            .Include(c => c.pacientes)
+                            .Include(c => c.medicos)
+                            .Where(c => c.IdMedico == idMedico);
+                    }
+                }
+                // --------------------------
+                // OTROS ROLES (no permitidos)
+                // --------------------------
+                else
+                {
+                    consultasQuery = Enumerable.Empty<consultas>().AsQueryable();
+                }
+
+                // EJECUCIÓN FINAL (ya con Includes)
+                var lista = consultasQuery.ToList();
+
+                return View(lista);
+            }
+            catch (Exception ex)
+            {
+                var errorInfo = new HandleErrorInfo(ex, "Consultas", "Index");
+                return View("Error", errorInfo);
+            }
         }
+
 
         // =====================================================================
         // DETALLES

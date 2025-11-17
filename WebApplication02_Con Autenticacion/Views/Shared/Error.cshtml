@@ -1,9 +1,21 @@
 ﻿@model System.Web.Mvc.HandleErrorInfo
 
 @{
-    ViewBag.Title = "Error";
+    ViewBag.Title = "Error del Sistema";
 }
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">Error al procesar la solicitud.</h2>
+<main class="container my-5 text-center">
+    <h1 class="text-danger">⚠️ Error</h1>
+    <h3 class="text-secondary">Ocurrió un problema al procesar la solicitud.</h3>
 
+    @if (Model != null)
+    {
+        <div class="alert alert-warning mt-4 text-start mx-auto" style="max-width: 600px;">
+            <strong>Controlador:</strong> @Model.ControllerName <br />
+            <strong>Acción:</strong> @Model.ActionName <br />
+            <strong>Mensaje:</strong> @Model.Exception.Message
+        </div>
+    }
+
+    <a href="~/Home/Index" class="btn btn-primary mt-3">Volver al inicio</a>
+</main>

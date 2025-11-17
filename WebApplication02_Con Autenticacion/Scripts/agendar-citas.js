@@ -14,7 +14,7 @@ var datosResumenCita = {
  * Seleccionar una fecha del calendario
  */
 function seleccionarFecha(fecha) {
-    // Validar que la fecha no sea posterior a 2030-12-31
+    // Validar fecha límite
     var fechaObj = new Date(fecha);
     var fechaLimite = new Date('2030-12-31');
 
@@ -23,7 +23,7 @@ function seleccionarFecha(fecha) {
         return;
     }
 
-    // Asignar la fecha seleccionada y enviar el formulario
+    // Guardar fecha y enviar formulario
     document.getElementById('fechaSeleccionada').value = fecha;
     document.getElementById('formAgendar').submit();
 }
@@ -37,22 +37,14 @@ function cambiarMes(incremento) {
 
     mesActual += incremento;
 
-    // Ajustar año si cambiamos de diciembre a enero o viceversa
-    if (mesActual > 12) {
-        mesActual = 1;
-        anioActual++;
-    } else if (mesActual < 1) {
-        mesActual = 12;
-        anioActual--;
-    }
+    if (mesActual > 12) { mesActual = 1; anioActual++; }
+    else if (mesActual < 1) { mesActual = 12; anioActual--; }
 
-    // VALIDACIÓN: No permitir navegar más allá de diciembre 2030
-    if (anioActual > 2030 || (anioActual === 2030 && mesActual > 12)) {
+    if (anioActual > 2030) {
         mostrarAlerta('No se pueden agendar citas posteriores al año 2030.', 'warning');
         return;
     }
 
-    // VALIDACIÓN: No permitir navegar antes del mes actual
     var hoy = new Date();
     var mesHoy = hoy.getMonth() + 1;
     var anioHoy = hoy.getFullYear();
@@ -62,85 +54,92 @@ function cambiarMes(incremento) {
         return;
     }
 
-    // Actualizar campos ocultos y enviar formulario
     document.getElementById('mesActual').value = mesActual;
     document.getElementById('anioActual').value = anioActual;
     document.getElementById('formAgendar').submit();
 }
 
 /**
- * Seleccionar un horario de la lista
+ * Seleccionar un horario
  */
 function seleccionarHorario(boton, hora) {
-    // Remover la clase 'seleccionado' de todos los botones
     document.querySelectorAll('.horario-btn').forEach(function (btn) {
         btn.classList.remove('seleccionado');
     });
 
-    // Agregar la clase 'seleccionado' al botón clickeado
     boton.classList.add('seleccionado');
 
-    // Guardar el horario seleccionado
     datosResumenCita.horario = hora;
     document.getElementById('horarioSeleccionado').value = hora;
 
-    // Habilitar el botón de confirmar
     document.getElementById('btnConfirmar').disabled = false;
 }
 
 /**
- * Obtener datos para el resumen de la cita
+ * Obtener los datos del resumen de cita
  */
 function obtenerDatosResumen() {
-    // Obtener especialidad
     var selectEspecialidad = document.getElementById('idEspecialidad');
     if (selectEspecialidad && selectEspecialidad.selectedIndex > 0) {
         datosResumenCita.especialidad = selectEspecialidad.options[selectEspecialidad.selectedIndex].text;
     }
 
-    // Obtener médico
     var selectMedico = document.getElementById('idMedico');
     if (selectMedico && selectMedico.selectedIndex > 0) {
         datosResumenCita.medico = selectMedico.options[selectMedico.selectedIndex].text;
     }
 
-    // Obtener fecha
     var inputFecha = document.getElementById('fechaSeleccionada');
     if (inputFecha && inputFecha.value) {
-        var fecha = new Date(inputFecha.value);
-        var opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        datosResumenCita.fecha = fecha.toLocaleDateString('es-ES', opciones);
+        datosResumenCita.fecha = formatearFechaSinDia(inputFecha.value);
     }
 }
 
 /**
- * Mostrar modal de confirmación con resumen
+ * Formatear fecha SOLO como: "20 de noviembre de 2025"
+ * SIN weekday, SIN timezone
+ */
+function formatearFechaSinDia(fechaStr) {
+    const partes = fechaStr.split("-");
+    const year = partes[0];
+    const month = partes[1];
+    const day = partes[2];
+
+    const meses = [
+        "enero", "febrero", "marzo", "abril", "mayo", "junio",
+        "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+    ];
+
+    const nombreMes = meses[parseInt(month) - 1];
+
+    return `${day} de ${nombreMes} de ${year}`;
+}
+
+/**
+ * Mostrar modal con resumen
  */
 function mostrarModalConfirmacion() {
-    // Obtener los datos actuales
     obtenerDatosResumen();
 
-    // Validar que todos los datos estén completos
     if (!datosResumenCita.horario) {
         mostrarAlerta('Por favor, seleccione un horario antes de confirmar la cita.', 'warning');
         return false;
     }
 
-    // Actualizar el contenido del modal
     document.getElementById('modalEspecialidad').textContent = datosResumenCita.especialidad || '-';
     document.getElementById('modalMedico').textContent = datosResumenCita.medico || '-';
     document.getElementById('modalFecha').textContent = datosResumenCita.fecha || '-';
-    document.getElementById('modalHorario').textContent = datosResumenCita.horario + ' - ' + calcularHoraFin(datosResumenCita.horario);
+    document.getElementById('modalHorario').textContent =
+        datosResumenCita.horario + ' - ' + calcularHoraFin(datosResumenCita.horario);
 
-    // Mostrar el modal
     var modal = new bootstrap.Modal(document.getElementById('modalConfirmarCita'));
     modal.show();
 
-    return false; // Prevenir el envío del formulario
+    return false;
 }
 
 /**
- * Calcular hora de fin (1 hora después)
+ * Calcular hora de fin (sumar 1 hora)
  */
 function calcularHoraFin(horaInicio) {
     if (!horaInicio) return '';
@@ -155,32 +154,26 @@ function calcularHoraFin(horaInicio) {
 }
 
 /**
- * Confirmar la cita (submit del formulario)
+ * Confirmar cita
  */
 function confirmarCita() {
-    // Cerrar el modal
     var modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmarCita'));
-    if (modal) {
-        modal.hide();
-    }
+    if (modal) modal.hide();
 
-    // Enviar el formulario
     document.getElementById('formConfirmar').submit();
 }
 
 /**
- * Mostrar alerta personalizada (opcional)
+ * Alertas (simple)
  */
 function mostrarAlerta(mensaje, tipo) {
-    // Puedes usar alert nativo o crear tu propia alerta
     alert(mensaje);
 }
 
 // =========================================================
-// EVENTOS AL CARGAR LA PÁGINA
+// EVENTOS AL CARGAR
 // =========================================================
 document.addEventListener('DOMContentLoaded', function () {
-    // Prevenir el envío directo del formulario y mostrar modal
     var formConfirmar = document.getElementById('formConfirmar');
     if (formConfirmar) {
         formConfirmar.addEventListener('submit', function (e) {
@@ -189,7 +182,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Evento del botón de confirmar en el modal
     var btnConfirmarModal = document.getElementById('btnConfirmarModal');
     if (btnConfirmarModal) {
         btnConfirmarModal.addEventListener('click', function () {
@@ -197,5 +189,5 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    console.log('Sistema de agendamiento de citas cargado correctamente');
+    console.log('Sistema de agendamiento cargado correctamente');
 });

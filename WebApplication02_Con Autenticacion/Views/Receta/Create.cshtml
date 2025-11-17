@@ -34,7 +34,7 @@
             <!-- Cantidad -->
             <div class="mb-3">
                 @Html.LabelFor(model => model.Cantidad, htmlAttributes: new { @class = "form-label fw-semibold" })
-                @Html.EditorFor(model => model.Cantidad, new { htmlAttributes = new { @class = "form-control", @placeholder = "Ejemplo: 2 tabletas diarias por 7 días" } })
+                @Html.EditorFor(model => model.Cantidad, new { htmlAttributes = new { @class = "form-control", @placeholder = "Ejemplo: 2 (Cantidad de Tabletas)" } })
                 @Html.ValidationMessageFor(model => model.Cantidad, "", new { @class = "text-danger" })
             </div>
 

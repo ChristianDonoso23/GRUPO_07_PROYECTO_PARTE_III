@@ -18,40 +18,74 @@ namespace WebApplication02_Con_Autenticacion.Controllers
         [Authorize(Roles = "SuperAdmin, Administrador, Medico")]
         public ActionResult Index()
         {
-            var usuario = SessionHelper.CurrentUser;
-            IQueryable<recetas> recetasQuery;
-
-            if (usuario == null)
-                return RedirectToAction("Login", "Account");
-
-            if (User.IsInRole("SuperAdmin") || User.IsInRole("Administrador"))
+            try
             {
-                recetasQuery = db.recetas
-                    .Include(r => r.consultas)
-                    .Include(r => r.medicamentos);
+                // -------------------------
+                // VALIDACIÓN DE SESIÓN
+                // -------------------------
+                var usuario = SessionHelper.CurrentUser;
+                if (usuario == null)
+                    return RedirectToAction("Login", "Account");
+
+                IQueryable<recetas> recetasQuery;
+
+                // -------------------------
+                // ROLES: ADMINISTRADORES
+                // -------------------------
+                if (User.IsInRole("SuperAdmin") || User.IsInRole("Administrador"))
+                {
+                    recetasQuery = db.recetas
+                        .Include(r => r.consultas)
+                        .Include(r => r.medicamentos);
+                }
+                // -------------------------
+                // ROLES: MÉDICO
+                // -------------------------
+                else if (User.IsInRole("Medico"))
+                {
+                    // Buscar el IdMedico del usuario logueado
+                    var idMedico = db.medicos
+                        .Where(m => m.IdUsuario == usuario.Id)
+                        .Select(m => m.IdMedico)
+                        .FirstOrDefault();
+
+                    // Si no existe un médico asociado → lista vacía
+                    if (idMedico == 0)
+                    {
+                        recetasQuery = Enumerable.Empty<recetas>().AsQueryable();
+                    }
+                    else
+                    {
+                        recetasQuery = db.recetas
+                            .Include(r => r.consultas)
+                            .Include(r => r.medicamentos)
+                            .Where(r => r.consultas.IdMedico == idMedico);
+                    }
+                }
+                // -------------------------
+                // OTROS ROLES
+                // -------------------------
+                else
+                {
+                    recetasQuery = Enumerable.Empty<recetas>().AsQueryable();
+                }
+
+                // Ejecutar consulta
+                var lista = recetasQuery.ToList();
+                System.Diagnostics.Debug.WriteLine("Total recetas cargadas: " + lista.Count);
+
+                return View(lista);
             }
-            else if (User.IsInRole("Medico"))
+            catch (Exception ex)
             {
-                var idMedico = db.medicos
-                    .Where(m => m.IdUsuario == usuario.Id)
-                    .Select(m => m.IdMedico)
-                    .FirstOrDefault();
+                // PREPARAR INFORMACIÓN DEL ERROR PARA TU VISTA PERSONALIZADA
+                var errorInfo = new HandleErrorInfo(ex, "Recetas", "Index");
 
-                recetasQuery = db.recetas
-                    .Include(r => r.consultas)
-                    .Include(r => r.medicamentos)
-                    .Where(r => r.consultas.IdMedico == idMedico);
+                // REDIRCIONAR A LA VISTA ERROR
+                return View("Error", errorInfo);
             }
-            else
-            {
-                recetasQuery = Enumerable.Empty<recetas>().AsQueryable();
-            }
-
-            var lista = recetasQuery.ToList();
-            System.Diagnostics.Debug.WriteLine("Total recetas cargadas: " + lista.Count);
-
-            return View(lista);
         }
+
 
         // GET: Receta/Details/5
         [Authorize(Roles = "SuperAdmin, Administrador, Medico")]

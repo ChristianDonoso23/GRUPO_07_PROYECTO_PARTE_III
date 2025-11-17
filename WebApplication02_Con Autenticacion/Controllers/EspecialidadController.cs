@@ -18,8 +18,18 @@ namespace WebApplication02_Con_Autenticacion.Controllers
         // GET: Especialidad
         public ActionResult Index()
         {
-            return View(db.especialidades.ToList());
+            try
+            {
+                var lista = db.especialidades.ToList();
+                return View(lista);
+            }
+            catch (Exception ex)
+            {
+                var errorInfo = new HandleErrorInfo(ex, "Especialidades", "Index");
+                return View("~/Views/Shared/Error.cshtml", errorInfo);
+            }
         }
+
 
         // GET: Especialidad/Details/5
         public ActionResult Details(int? id)

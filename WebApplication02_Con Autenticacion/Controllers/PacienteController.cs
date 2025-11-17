@@ -21,31 +21,47 @@ namespace WebApplication02_Con_Autenticacion.Controllers
         // GET: Paciente
         public ActionResult Index()
         {
-            var usuario = SessionHelper.CurrentUser;
-            if (usuario == null)
-                return RedirectToAction("Login", "Account");
-
-            IQueryable<pacientes> pacientesQuery;
-
-            if (User.IsInRole("SuperAdmin") || User.IsInRole("Administrador"))
+            try
             {
-                pacientesQuery = db.pacientes.Include(p => p.AspNetUsers);
-            }
-            else if (User.IsInRole("Paciente"))
-            {
-                pacientesQuery = db.pacientes
-                    .Include(p => p.AspNetUsers)
-                    .Where(p => p.IdUsuario == usuario.Id);
-            }
-            else
-            {
-                pacientesQuery = Enumerable.Empty<pacientes>().AsQueryable();
-            }
+                // Verificación de sesión
+                var usuario = SessionHelper.CurrentUser;
+                if (usuario == null)
+                    return RedirectToAction("Login", "Account");
 
-            var lista = pacientesQuery.ToList();
-            System.Diagnostics.Debug.WriteLine("Pacientes cargados: " + lista.Count);
-            return View(lista);
+                IQueryable<pacientes> pacientesQuery;
+
+                // Validación de roles
+                if (User.IsInRole("SuperAdmin") || User.IsInRole("Administrador"))
+                {
+                    pacientesQuery = db.pacientes.Include(p => p.AspNetUsers);
+                }
+                else if (User.IsInRole("Paciente"))
+                {
+                    pacientesQuery = db.pacientes
+                        .Include(p => p.AspNetUsers)
+                        .Where(p => p.IdUsuario == usuario.Id);
+                }
+                else
+                {
+                    pacientesQuery = Enumerable.Empty<pacientes>().AsQueryable();
+                }
+
+                // Ejecución de la consulta
+                var lista = pacientesQuery.ToList();
+                System.Diagnostics.Debug.WriteLine("Pacientes cargados: " + lista.Count);
+
+                return View(lista);
+            }
+            catch (Exception ex)
+            {
+                // PREPARAR INFORMACIÓN DEL ERROR PARA MOSTRAR EN TU VISTA
+                var errorInfo = new HandleErrorInfo(ex, "Paciente", "Index");
+
+                // REDIRIGIR A TU VISTA PERSONALIZADA
+                return View("Error", errorInfo);
+            }
         }
+
 
         // GET: Paciente/Details/5
         public ActionResult Details(int? id)

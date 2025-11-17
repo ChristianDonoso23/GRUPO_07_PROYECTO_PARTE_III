@@ -20,9 +20,24 @@ namespace WebApplication02_Con_Autenticacion.Controllers
         // GET: Medico
         public ActionResult Index()
         {
-            var medicos = db.medicos.Include(m => m.AspNetUsers).Include(m => m.especialidades);
-            return View(medicos.ToList());
+            try
+            {
+                var medicos = db.medicos
+                    .Include(m => m.AspNetUsers)
+                    .Include(m => m.especialidades)
+                    .ToList();
+
+                return View(medicos);
+            }
+            catch (Exception ex)
+            {
+                // Mantener el error para mostrar información en la vista
+                var errorInfo = new HandleErrorInfo(ex, "Medico", "Index");
+
+                return View("Error", errorInfo);
+            }
         }
+
 
         // GET: Medico/Details/5
         public ActionResult Details(int? id)

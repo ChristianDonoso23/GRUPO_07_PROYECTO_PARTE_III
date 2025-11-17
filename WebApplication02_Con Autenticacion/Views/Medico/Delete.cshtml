@@ -21,7 +21,7 @@
             <div class="col-md-4 text-center veris-eliminar-foto-wrapper">
                 @if (!string.IsNullOrEmpty(Model.Foto))
                 {
-                    <img src="~/Imagenes/@Model.Foto" class="veris-eliminar-img" />
+                    <img src="~/Imagenes/Sellos/@Model.Foto" class="veris-eliminar-img" />
                 }
                 else
                 {
@@ -34,7 +34,7 @@
         {
             @Html.AntiForgeryToken()
             <div class="text-center mt-4">
-                <input type="submit" value="Eliminar" class="btn veris-eliminar-btn" />
+                <input type="submit" value="Eliminar" class="btn veris-eliminar-btn btn-danger mx-2" />
                 @Html.ActionLink("Cancelar", "Index", null, new { @class = "btn btn-secondary veris-eliminar-back" })
             </div>
         }
