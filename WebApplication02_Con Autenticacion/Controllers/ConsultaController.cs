@@ -87,11 +87,12 @@ namespace WebApplication02_Con_Autenticacion.Controllers
         // CREAR CONSULTA (GET) - CON HORARIOS DINÁMICOS
         // =====================================================================
         [Authorize(Roles = "SuperAdmin, Medico")]
-        public ActionResult Create(int? idMedico, DateTime? fecha)
+        public ActionResult Create(int? idMedico, int? idPaciente, DateTime? fecha)
         {
             var usuario = SessionHelper.CurrentUser;
 
-            ViewBag.IdPaciente = new SelectList(db.pacientes, "IdPaciente", "Nombre");
+            // Mantener el paciente seleccionado
+            ViewBag.IdPaciente = new SelectList(db.pacientes, "IdPaciente", "Nombre", idPaciente);
 
             if (usuario != null && User.IsInRole("Medico") && !User.IsInRole("SuperAdmin"))
             {

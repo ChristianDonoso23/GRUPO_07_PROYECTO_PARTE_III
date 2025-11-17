@@ -5,49 +5,118 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="veris-crear-container">
-    <h2 class="veris-crear-title">Editar Médico</h2>
-    <p class="veris-crear-subtitle">Actualice los datos del médico</p>
+<div class="container my-5 veris-crear-container">
+    <h2 class="veris-crear-title text-center mb-3">Editar Médico</h2>
 
-    @using (Html.BeginForm("Edit", "Medico", FormMethod.Post, new { enctype = "multipart/form-data", @class = "veris-crear-form" }))
+    @using (Html.BeginForm(null, null, FormMethod.Post, new { enctype = "multipart/form-data", @class = "form-horizontal veris-crear-form" }))
     {
         @Html.AntiForgeryToken()
-        @Html.HiddenFor(m => m.IdMedico)
+        @Html.HiddenFor(model => model.IdMedico)
+        @Html.HiddenFor(model => model.IdUsuario)
 
-        <div class="form-group mb-3">
-            @Html.LabelFor(m => m.Nombre)
-            @Html.TextBoxFor(m => m.Nombre, new { @class = "form-control veris-register-input" })
-        </div>
+        <h4 class="veris-crear-subtitle text-center">Actualice los datos del médico</h4>
+        <hr class="veris-crear-divider" />
 
-        <div class="form-group mb-3">
-            @Html.LabelFor(m => m.IdEspecialidad, "Especialidad")
-            @Html.DropDownList("IdEspecialidad", null, "-- Seleccione una especialidad --", new { @class = "form-control veris-register-input" })
-        </div>
+        @Html.ValidationSummary(true, "", new { @class = "text-danger veris-crear-validation" })
 
-        <div class="form-group mb-3">
-            @Html.LabelFor(m => m.IdUsuario, "Usuario")
-            @Html.DropDownList("IdUsuario", null, "-- Seleccione un usuario --", new { @class = "form-control veris-register-input" })
-        </div>
-
+        <!-- Nombre -->
         <div class="form-group row mb-3 veris-crear-group">
-            @Html.LabelFor(model => model.Foto, new { @class = "control-label col-md-3 veris-crear-label" })
+            @Html.LabelFor(model => model.Nombre, new { @class = "control-label col-md-3 veris-crear-label" })
+            <div class="col-md-9 veris-crear-input-col">
+                @Html.TextBoxFor(model => model.Nombre, new { @class = "form-control veris-crear-input", placeholder = "Ejemplo: Dr. Juan Pérez" })
+                @Html.ValidationMessageFor(model => model.Nombre, "", new { @class = "text-danger d-block veris-crear-error" })
+            </div>
+        </div>
+
+        <!-- Especialidad -->
+        <div class="form-group row mb-3 veris-crear-group">
+            @Html.LabelFor(model => model.IdEspecialidad, "Especialidad", new { @class = "control-label col-md-3 veris-crear-label" })
+            <div class="col-md-9 veris-crear-input-col">
+                @Html.DropDownList("IdEspecialidad", null, "-- Seleccione una especialidad --", new { @class = "form-control veris-crear-input" })
+                @Html.ValidationMessageFor(model => model.IdEspecialidad, "", new { @class = "text-danger d-block veris-crear-error" })
+            </div>
+        </div>
+
+        <!-- Usuario Asociado (solo lectura) -->
+        <div class="form-group row mb-3 veris-crear-group">
+            @Html.LabelFor(model => model.IdUsuario, "Usuario Asociado", new { @class = "control-label col-md-3 veris-crear-label" })
+            <div class="col-md-9 veris-crear-input-col">
+                @Html.DropDownList("IdUsuario", null, new { @class = "form-control veris-crear-input", disabled = "disabled" })
+                <small class="form-text text-muted">
+                    <i class="bi bi-info-circle"></i> El usuario asociado no puede ser modificado.
+                </small>
+            </div>
+        </div>
+
+        <!-- Foto/Sello -->
+        <div class="form-group row mb-3 veris-crear-group">
+            @Html.LabelFor(model => model.Foto, "Sello del Médico", new { @class = "control-label col-md-3 veris-crear-label" })
             <div class="col-md-9 veris-crear-input-col">
                 @Html.DropDownListFor(model => model.Foto, (SelectList)ViewBag.Fotos,
                     "-- Seleccione una imagen --", new { @class = "form-control veris-crear-input", id = "FotoSelect" })
 
-                <img id="previewFoto"
-                     src="~/Imagenes/Sellos/@Model.Foto"
-                     alt="Vista previa"
-                     class="img-thumbnail mt-3 shadow-sm"
-                     style="max-width:150px; border-radius:10px; display:@(string.IsNullOrEmpty(Model.Foto) ? "none" : "block");" />
+                <!-- Vista previa -->
+                <div class="mt-3 text-center">
+                    <img id="previewFoto"
+                         src="@Url.Content("~/Imagenes/Sellos/" + Model.Foto)"
+                         alt="Vista previa"
+                         class="img-thumbnail shadow-sm"
+                         style="max-width: 200px; max-height: 200px; border-radius: 10px; display: @(string.IsNullOrEmpty(Model.Foto) ? "none" : "block"); object-fit: cover;" />
+
+                    <div id="noFotoPlaceholder" style="display: @(string.IsNullOrEmpty(Model.Foto) ? "block" : "none");">
+                        <i class="bi bi-file-earmark-medical" style="font-size: 100px; color: #adb5bd;"></i>
+                        <p class="text-muted mt-2">Sin sello seleccionado</p>
+                    </div>
+                </div>
 
                 @Html.ValidationMessageFor(model => model.Foto, "", new { @class = "text-danger d-block veris-crear-error" })
             </div>
         </div>
 
-        <div class="veris-crear-button-group">
-            <input type="submit" value="Guardar Cambios" class="btn veris-crear-btn" />
-            @Html.ActionLink("Volver", "Index", null, new { @class = "btn btn-secondary ms-2" })
+        <!-- Botones -->
+        <div class="form-group row mt-4 text-center veris-crear-button-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Guardar Cambios" class="btn veris-crear-btn btn-primary" />
+                @Html.ActionLink("Volver", "Index", null, new { @class = "btn btn-outline-secondary veris-crear-back ms-2" })
+            </div>
         </div>
     }
 </div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        // Vista previa de la foto seleccionada
+        document.addEventListener('DOMContentLoaded', function () {
+            const fotoSelect = document.getElementById('FotoSelect');
+            const preview = document.getElementById('previewFoto');
+            const placeholder = document.getElementById('noFotoPlaceholder');
+
+            if (fotoSelect) {
+                fotoSelect.addEventListener('change', function () {
+                    const selectedFile = this.value;
+
+                    if (selectedFile && selectedFile !== '') {
+                        // Construir la ruta correcta
+                        const rutaBase = '@Url.Content("~/Imagenes/Sellos/")';
+                        preview.src = rutaBase + selectedFile;
+                        preview.style.display = 'block';
+                        placeholder.style.display = 'none';
+
+                        // Manejar error de carga de imagen
+                        preview.onerror = function () {
+                            console.error('Error al cargar la imagen: ' + preview.src);
+                            preview.style.display = 'none';
+                            placeholder.style.display = 'block';
+                            alert('No se pudo cargar la imagen seleccionada.');
+                        };
+                    } else {
+                        // Si no hay selección, mostrar placeholder
+                        preview.style.display = 'none';
+                        placeholder.style.display = 'block';
+                    }
+                });
+            }
+        });
+    </script>
+}

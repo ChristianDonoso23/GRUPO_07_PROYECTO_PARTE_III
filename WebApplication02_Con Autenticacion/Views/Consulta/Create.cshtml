@@ -48,12 +48,12 @@
             <div class="col-md-9 veris-crear-input-col">
                 <input type="date" name="fecha"
                        value="@ViewBag.FechaSeleccionada"
-                       min="@DateTime.Now.ToString("yyyy-MM-dd")"
+                       min="2000-01-01"
                        max="2030-12-31"
                        class="form-control veris-crear-input"
                        onchange="this.form.submit();" />
                 <small class="form-text text-muted">
-                    Solo se permiten fechas desde hoy hasta el año 2030.
+                    Solo se permiten fechas desde el año 2000 hasta 2030.
                 </small>
             </div>
         </div>
@@ -134,7 +134,7 @@
     {
         <div class="alert alert-info mt-4 text-center">
             <i class="bi bi-info-circle me-2"></i>
-            Por favor, seleccione un médico y una fecha para ver los horarios disponibles.
+            Por favor, seleccione un médico, paciente y una fecha para ver los horarios disponibles.
         </div>
 
         <div class="text-center mt-3">

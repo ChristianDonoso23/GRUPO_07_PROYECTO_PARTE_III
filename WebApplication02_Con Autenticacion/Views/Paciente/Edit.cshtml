@@ -52,9 +52,9 @@
             <div class="col-md-9 veris-crear-input-col">
                 <select id="Genero" name="Genero" class="form-control veris-crear-input">
                     <option value="">Seleccione...</option>
-                    <option value="M" @(Model.Genero == "Masculino" ? "selected" : "")>Masculino</option>
-                    <option value="F" @(Model.Genero == "Femenino" ? "selected" : "")>Femenino</option>
-                    <option value="O" @(Model.Genero == "Otro" ? "selected" : "")>Otro</option>
+                    <option value="M" @(Model.Genero == "M" ? "selected" : "")>Masculino</option>
+                    <option value="F" @(Model.Genero == "F" ? "selected" : "")>Femenino</option>
+                    <option value="O" @(Model.Genero == "O" ? "selected" : "")>Otro</option>
                 </select>
                 @Html.ValidationMessageFor(model => model.Genero, "", new { @class = "text-danger d-block veris-crear-error" })
             </div>
@@ -85,11 +85,19 @@
                 @Html.DropDownListFor(model => model.Foto, (SelectList)ViewBag.Fotos,
                     "-- Seleccione una imagen --", new { @class = "form-control veris-crear-input", id = "FotoSelect" })
 
-                <img id="previewFoto"
-                     src="~/Imagenes/Usuarios/@Model.Foto"
-                     alt="Vista previa"
-                     class="img-thumbnail mt-3 shadow-sm"
-                     style="max-width:150px; border-radius:10px; display:@(string.IsNullOrEmpty(Model.Foto) ? "none" : "block");" />
+                <!-- Vista previa de la foto -->
+                <div class="mt-3 text-center">
+                    <img id="previewFoto"
+                         src="@Url.Content("~/Imagenes/Usuarios/" + Model.Foto)"
+                         alt="Vista previa"
+                         class="img-thumbnail shadow-sm"
+                         style="max-width: 200px; max-height: 200px; border-radius: 10px; display: @(string.IsNullOrEmpty(Model.Foto) ? "none" : "block"); object-fit: cover;" />
+
+                    <div id="noFotoPlaceholder" style="display: @(string.IsNullOrEmpty(Model.Foto) ? "block" : "none");">
+                        <i class="bi bi-person-circle" style="font-size: 100px; color: #adb5bd;"></i>
+                        <p class="text-muted mt-2">Sin foto seleccionada</p>
+                    </div>
+                </div>
 
                 @Html.ValidationMessageFor(model => model.Foto, "", new { @class = "text-danger d-block veris-crear-error" })
             </div>
@@ -109,14 +117,35 @@
     @Scripts.Render("~/bundles/jqueryval")
     <script>
         // Vista previa de la foto seleccionada
-        document.getElementById("FotoSelect").addEventListener("change", function () {
-            const selectedFile = this.value;
-            const preview = document.getElementById("previewFoto");
-            if (selectedFile) {
-                preview.src = "/Content/FotosPacientes/" + selectedFile;
-                preview.style.display = "block";
-            } else {
-                preview.style.display = "none";
+        document.addEventListener('DOMContentLoaded', function () {
+            const fotoSelect = document.getElementById('FotoSelect');
+            const preview = document.getElementById('previewFoto');
+            const placeholder = document.getElementById('noFotoPlaceholder');
+
+            if (fotoSelect) {
+                fotoSelect.addEventListener('change', function () {
+                    const selectedFile = this.value;
+
+                    if (selectedFile && selectedFile !== '') {
+                        // Construir la ruta correcta
+                        const rutaBase = '@Url.Content("~/Imagenes/Usuarios/")';
+                        preview.src = rutaBase + selectedFile;
+                        preview.style.display = 'block';
+                        placeholder.style.display = 'none';
+
+                        // Manejar error de carga de imagen
+                        preview.onerror = function () {
+                            console.error('Error al cargar la imagen: ' + preview.src);
+                            preview.style.display = 'none';
+                            placeholder.style.display = 'block';
+                            alert('No se pudo cargar la imagen seleccionada.');
+                        };
+                    } else {
+                        // Si no hay selección, mostrar placeholder
+                        preview.style.display = 'none';
+                        placeholder.style.display = 'block';
+                    }
+                });
             }
         });
     </script>

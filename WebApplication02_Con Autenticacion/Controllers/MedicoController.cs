@@ -199,15 +199,17 @@ namespace WebApplication02_Con_Autenticacion.Controllers
             if (medico == null)
                 return HttpNotFound();
 
+            // Pasar el valor actual de especialidad como seleccionado
             ViewBag.IdEspecialidad = new SelectList(db.especialidades, "IdEspecialidad", "Descripcion", medico.IdEspecialidad);
 
-            /* Listamos las fotos disponibles */
+            // Listamos las fotos disponibles con la foto actual seleccionada
             string path = Server.MapPath("~/Imagenes/Sellos");
             var archivos = System.IO.Directory.GetFiles(path)
                 .Select(f => System.IO.Path.GetFileName(f))
                 .ToList();
             ViewBag.Fotos = new SelectList(archivos, medico.Foto);
 
+            // Pasar el usuario actual como seleccionado
             ViewBag.IdUsuario = new SelectList(db.AspNetUsers.Where(u => u.Id == medico.IdUsuario), "Id", "Email", medico.IdUsuario);
 
             return View(medico);
@@ -218,19 +220,26 @@ namespace WebApplication02_Con_Autenticacion.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "IdMedico,IdUsuario,Nombre,IdEspecialidad,Foto")] medicos medico)
         {
+            // Mantener los valores seleccionados en caso de error
             ViewBag.IdEspecialidad = new SelectList(db.especialidades, "IdEspecialidad", "Descripcion", medico.IdEspecialidad);
-            /* Listamos las fotos disponibles */
+
+            // Listamos las fotos disponibles
             string path = Server.MapPath("~/Imagenes/Sellos");
             var archivos = System.IO.Directory.GetFiles(path)
                 .Select(f => System.IO.Path.GetFileName(f))
                 .ToList();
             ViewBag.Fotos = new SelectList(archivos, medico.Foto);
 
+            // Mantener el usuario seleccionado en caso de error
+            ViewBag.IdUsuario = new SelectList(db.AspNetUsers, "Id", "Email", medico.IdUsuario);
+
             if (!ModelState.IsValid)
                 return View(medico);
 
             db.Entry(medico).State = EntityState.Modified;
             db.SaveChanges();
+
+            TempData["Mensaje"] = "✅ Médico actualizado correctamente.";
             return RedirectToAction("Index");
         }
 
